@@ -425,7 +425,7 @@
         }
 
         // =========================================================================
-        // 1. STATE-OF-THE-ART 3D HERO CANVAS (Interactive Three.js Growth Ecosystem)
+        // 1. MINIMAL 3D HOVER-READY PARTICLE FIELD (Three.js Constellation Canvas)
         // =========================================================================
         function ThreeJsHeroEcosystem() {
             const containerRef = useRef(null);
@@ -434,12 +434,12 @@
                 if (!window.THREE || !containerRef.current) return;
 
                 const container = containerRef.current;
-                const width = container.clientWidth || window.innerWidth;
-                const height = container.clientHeight || 650;
+                let width = container.clientWidth || window.innerWidth;
+                let height = container.clientHeight || 620;
 
                 const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                camera.position.set(0, 0, 28);
+                const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+                camera.position.set(0, 0, 26);
 
                 const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
                 renderer.setSize(width, height);
@@ -447,114 +447,112 @@
                 container.innerHTML = '';
                 container.appendChild(renderer.domElement);
 
-                // Elegant Luxury Lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-                scene.add(ambientLight);
+                // Create soft circular radial gradient sprite texture for clean minimal dots
+                const spriteCanvas = document.createElement('canvas');
+                spriteCanvas.width = 64;
+                spriteCanvas.height = 64;
+                const ctx = spriteCanvas.getContext('2d');
+                const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grad.addColorStop(0.45, 'rgba(255, 255, 255, 0.85)');
+                grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 64, 64);
+                const particleTexture = new THREE.CanvasTexture(spriteCanvas);
 
-                const dirLight = new THREE.DirectionalLight(0xfffaed, 1.8);
-                dirLight.position.set(15, 20, 15);
-                scene.add(dirLight);
+                // Particle data setup (minimal 130 particles)
+                const particleCount = window.innerWidth < 640 ? 75 : 130;
+                const positions = new Float32Array(particleCount * 3);
+                const colors = new Float32Array(particleCount * 3);
+                const basePositions = [];
+                const driftOffsets = [];
 
-                const pointLightGold = new THREE.PointLight(0xC6A15B, 2.5, 60);
-                pointLightGold.position.set(12, -8, 14);
-                scene.add(pointLightGold);
+                const goldColor = new THREE.Color(0xC6A15B);
+                const forestColor = new THREE.Color(0x092B23);
 
-                const pointLightEmerald = new THREE.PointLight(0x10b981, 2.0, 50);
-                pointLightEmerald.position.set(-16, 12, 10);
-                scene.add(pointLightEmerald);
+                for (let i = 0; i < particleCount; i++) {
+                    const bx = (Math.random() - 0.5) * 42;
+                    const by = (Math.random() - 0.5) * 24;
+                    const bz = (Math.random() - 0.5) * 14;
 
-                const rootGroup = new THREE.Group();
-                scene.add(rootGroup);
+                    positions[i * 3] = bx;
+                    positions[i * 3 + 1] = by;
+                    positions[i * 3 + 2] = bz;
 
-                // Central Shiny Floating Tech Polyhedron (Faceted Gold Crystal)
-                const coreGeo = new THREE.IcosahedronGeometry(4.8, 1);
-                const coreMat = new THREE.MeshStandardMaterial({
-                    color: 0xC6A15B,
-                    metalness: 0.85,
-                    roughness: 0.22,
-                    flatShading: true
-                });
-                const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-                rootGroup.add(coreMesh);
+                    basePositions.push({ x: bx, y: by, z: bz });
+                    driftOffsets.push({
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 0.4 + Math.random() * 0.6,
+                        ampX: 0.3 + Math.random() * 0.5,
+                        ampY: 0.3 + Math.random() * 0.5
+                    });
 
-                // Outer Emerald Wireframe Lattice
-                const cageGeo = new THREE.IcosahedronGeometry(7.2, 1);
-                const cageMat = new THREE.MeshBasicMaterial({
-                    color: 0x092B23,
-                    wireframe: true,
-                    transparent: true,
-                    opacity: 0.22
-                });
-                const cageMesh = new THREE.Mesh(cageGeo, cageMat);
-                rootGroup.add(cageMesh);
+                    const c = i % 3 === 0 ? goldColor : forestColor;
+                    colors[i * 3] = c.r;
+                    colors[i * 3 + 1] = c.g;
+                    colors[i * 3 + 2] = c.b;
+                }
 
-                // Orbiting Luxury Rings
-                const ring1Geo = new THREE.TorusGeometry(8.5, 0.08, 16, 100);
-                const ring1Mat = new THREE.MeshStandardMaterial({ color: 0xC6A15B, metalness: 0.9, roughness: 0.1 });
-                const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
-                ring1.rotation.x = Math.PI / 3;
-                rootGroup.add(ring1);
-
-                const ring2Geo = new THREE.TorusGeometry(10.2, 0.06, 16, 100);
-                const ring2Mat = new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.7, roughness: 0.2 });
-                const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-                ring2.rotation.y = Math.PI / 4;
-                rootGroup.add(ring2);
-
-                // Luminous Particle Galaxy (280 floating stars)
-                const particleCount = 280;
                 const particleGeo = new THREE.BufferGeometry();
-                const posArray = new Float32Array(particleCount * 3);
-                for (let i = 0; i < particleCount * 3; i += 3) {
-                    posArray[i] = (Math.random() - 0.5) * 55;
-                    posArray[i + 1] = (Math.random() - 0.5) * 45;
-                    posArray[i + 2] = (Math.random() - 0.5) * 35;
-                }
-                particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
                 const particleMat = new THREE.PointsMaterial({
-                    size: 0.22,
+                    size: 0.55,
+                    map: particleTexture,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.72,
+                    depthWrite: false
+                });
+
+                const particleSystem = new THREE.Points(particleGeo, particleMat);
+                scene.add(particleSystem);
+
+                // Delicate connecting constellation lines
+                const maxConnections = particleCount * 6;
+                const linePositions = new Float32Array(maxConnections * 6);
+                const lineGeo = new THREE.BufferGeometry();
+                lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+
+                const lineMat = new THREE.LineBasicMaterial({
                     color: 0xC6A15B,
                     transparent: true,
-                    opacity: 0.65
+                    opacity: 0.16,
+                    depthWrite: false
                 });
-                const particleMesh = new THREE.Points(particleGeo, particleMat);
-                scene.add(particleMesh);
+                const lineSegments = new THREE.LineSegments(lineGeo, lineMat);
+                scene.add(lineSegments);
 
-                // Orbiting satellite data nodes
-                const satellites = [];
-                const satRadii = [8.5, 9.6, 10.8, 11.5];
-                const satSpeeds = [0.007, 0.005, 0.004, 0.006];
-                for (let i = 0; i < 4; i++) {
-                    const satGeo = new THREE.SphereGeometry(0.5, 16, 16);
-                    const satMat = new THREE.MeshStandardMaterial({
-                        color: i % 2 === 0 ? 0xC6A15B : 0x10b981,
-                        metalness: 0.8,
-                        roughness: 0.2
-                    });
-                    const satMesh = new THREE.Mesh(satGeo, satMat);
-                    rootGroup.add(satMesh);
-                    satellites.push({
-                        mesh: satMesh,
-                        radius: satRadii[i],
-                        speed: satSpeeds[i],
-                        angle: (i * Math.PI) / 2
-                    });
-                }
+                // Smooth hover-ready pointer state
+                const pointer = { x: 0, y: 0, worldX: 999, worldY: 999, active: false };
 
-                // Interactive Mouse & Touch Tracking
-                let targetX = 0, targetY = 0;
-                const onPointerMove = (e) => {
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const updatePointer = (clientX, clientY) => {
                     const rect = container.getBoundingClientRect();
-                    const x = ((clientX - rect.left) / width) * 2 - 1;
-                    const y = -(((clientY - rect.top) / height) * 2 - 1);
-                    targetY = x * 0.55;
-                    targetX = -y * 0.35;
+                    if (clientY < rect.top || clientY > rect.bottom) {
+                        pointer.active = false;
+                        return;
+                    }
+                    const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+                    const ndcY = -(((clientY - rect.top) / rect.height) * 2 - 1);
+                    pointer.x = ndcX;
+                    pointer.y = ndcY;
+                    pointer.worldX = ndcX * 21;
+                    pointer.worldY = ndcY * 12;
+                    pointer.active = true;
                 };
 
-                window.addEventListener('mousemove', onPointerMove, { passive: true });
-                window.addEventListener('touchmove', onPointerMove, { passive: true });
+                const onMouseMove = (e) => updatePointer(e.clientX, e.clientY);
+                const onTouchMove = (e) => {
+                    if (e.touches && e.touches[0]) {
+                        updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                };
+                const onPointerLeave = () => { pointer.active = false; };
+
+                window.addEventListener('mousemove', onMouseMove, { passive: true });
+                window.addEventListener('touchmove', onTouchMove, { passive: true });
+                window.addEventListener('mouseleave', onPointerLeave, { passive: true });
 
                 let isVisible = true;
                 const observer = new IntersectionObserver(([entry]) => {
@@ -564,29 +562,79 @@
 
                 const clock = new THREE.Clock();
                 let animId;
+
                 const animate = () => {
                     animId = requestAnimationFrame(animate);
                     if (!isVisible) return;
-                    const elapsed = clock.getElapsedTime();
 
-                    rootGroup.rotation.y += (targetY - rootGroup.rotation.y) * 0.05 + 0.002;
-                    rootGroup.rotation.x += (targetX - rootGroup.rotation.x) * 0.05;
+                    const t = clock.getElapsedTime();
+                    const posAttr = particleGeo.attributes.position;
+                    const posArr = posAttr.array;
 
-                    coreMesh.rotation.y = elapsed * 0.15;
-                    coreMesh.rotation.x = elapsed * 0.1;
-                    cageMesh.rotation.y = -elapsed * 0.08;
+                    // Subtle camera parallax on hover
+                    const targetCamX = pointer.active ? pointer.x * 1.6 : 0;
+                    const targetCamY = pointer.active ? pointer.y * 1.1 : 0;
+                    camera.position.x += (targetCamX - camera.position.x) * 0.04;
+                    camera.position.y += (targetCamY - camera.position.y) * 0.04;
+                    camera.lookAt(0, 0, 0);
 
-                    ring1.rotation.z = elapsed * 0.12;
-                    ring2.rotation.z = -elapsed * 0.1;
+                    // Update particles with gentle organic drift + hover repulsion
+                    for (let i = 0; i < particleCount; i++) {
+                        const base = basePositions[i];
+                        const drift = driftOffsets[i];
 
-                    particleMesh.rotation.y = elapsed * 0.02;
+                        let targetX = base.x + Math.sin(t * drift.speed + drift.phase) * drift.ampX;
+                        let targetY = base.y + Math.cos(t * drift.speed + drift.phase) * drift.ampY;
+                        let targetZ = base.z + Math.sin(t * 0.5 + drift.phase) * 0.6;
 
-                    satellites.forEach((sat, idx) => {
-                        sat.angle += sat.speed;
-                        sat.mesh.position.x = Math.cos(sat.angle) * sat.radius;
-                        sat.mesh.position.z = Math.sin(sat.angle) * sat.radius;
-                        sat.mesh.position.y = Math.sin(elapsed * 2 + idx) * 1.5;
-                    });
+                        if (pointer.active) {
+                            const dx = targetX - pointer.worldX;
+                            const dy = targetY - pointer.worldY;
+                            const distSq = dx * dx + dy * dy;
+                            const hoverRadius = 7.5;
+                            if (distSq < hoverRadius * hoverRadius && distSq > 0.001) {
+                                const dist = Math.sqrt(distSq);
+                                const force = (1 - dist / hoverRadius) * 2.8;
+                                targetX += (dx / dist) * force;
+                                targetY += (dy / dist) * force;
+                                targetZ += force * 0.9;
+                            }
+                        }
+
+                        const idx = i * 3;
+                        posArr[idx] += (targetX - posArr[idx]) * 0.08;
+                        posArr[idx + 1] += (targetY - posArr[idx + 1]) * 0.08;
+                        posArr[idx + 2] += (targetZ - posArr[idx + 2]) * 0.08;
+                    }
+                    posAttr.needsUpdate = true;
+
+                    // Update minimal connecting lines between nearby particles
+                    let lineIndex = 0;
+                    const connectDistSq = 36; // distance threshold 6 units
+                    for (let i = 0; i < particleCount; i++) {
+                        const ix = posArr[i * 3];
+                        const iy = posArr[i * 3 + 1];
+                        const iz = posArr[i * 3 + 2];
+                        for (let j = i + 1; j < particleCount; j++) {
+                            if (lineIndex >= maxConnections) break;
+                            const jx = posArr[j * 3];
+                            const jy = posArr[j * 3 + 1];
+                            const jz = posArr[j * 3 + 2];
+                            const dSq = (ix - jx) * (ix - jx) + (iy - jy) * (iy - jy) + (iz - jz) * (iz - jz);
+                            if (dSq < connectDistSq) {
+                                const lIdx = lineIndex * 6;
+                                linePositions[lIdx] = ix;
+                                linePositions[lIdx + 1] = iy;
+                                linePositions[lIdx + 2] = iz;
+                                linePositions[lIdx + 3] = jx;
+                                linePositions[lIdx + 4] = jy;
+                                linePositions[lIdx + 5] = jz;
+                                lineIndex++;
+                            }
+                        }
+                    }
+                    lineGeo.setDrawRange(0, lineIndex * 2);
+                    lineGeo.attributes.position.needsUpdate = true;
 
                     renderer.render(scene, camera);
                 };
@@ -594,20 +642,26 @@
 
                 const handleResize = () => {
                     if (!container) return;
-                    const w = container.clientWidth;
-                    const h = container.clientHeight;
-                    camera.aspect = w / h;
+                    width = container.clientWidth || window.innerWidth;
+                    height = container.clientHeight || 620;
+                    camera.aspect = width / height;
                     camera.updateProjectionMatrix();
-                    renderer.setSize(w, h);
+                    renderer.setSize(width, height);
                 };
                 window.addEventListener('resize', handleResize);
 
                 return () => {
                     cancelAnimationFrame(animId);
                     observer.disconnect();
-                    window.removeEventListener('mousemove', onPointerMove);
-                    window.removeEventListener('touchmove', onPointerMove);
+                    window.removeEventListener('mousemove', onMouseMove);
+                    window.removeEventListener('touchmove', onTouchMove);
+                    window.removeEventListener('mouseleave', onPointerLeave);
                     window.removeEventListener('resize', handleResize);
+                    particleTexture.dispose();
+                    particleGeo.dispose();
+                    particleMat.dispose();
+                    lineGeo.dispose();
+                    lineMat.dispose();
                     renderer.dispose();
                 };
             }, []);
@@ -615,7 +669,7 @@
             return (
                 <div 
                     ref={containerRef} 
-                    className="absolute inset-0 pointer-events-none opacity-85 z-0 overflow-hidden" 
+                    className="absolute inset-0 pointer-events-none opacity-80 z-0 overflow-hidden" 
                     aria-hidden="true"
                 />
             );
@@ -1334,125 +1388,99 @@
         }
 
         // =========================================================================
-        // 5. PAGE 1: HOME SCREEN (Attractive 3D, Outcome-Focused, Non-Technical)
+        // 5. PAGE 1: HOME SCREEN (Short, High-Impact, Visual & Editorial Design)
         // =========================================================================
         function HomeScreen({ onNavigate, onOpenConsultation }) {
             return (
-                <div className="space-y-24 sm:space-y-32 pb-24">
-                    {/* 1. Hero Section with Interactive 3D Hub */}
+                <div className="space-y-20 sm:space-y-28 pb-20">
+                    {/* 1. Minimalist Editorial Hero with Hover-Ready 3D Particle Canvas */}
                     <HeroSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 2. Positioning Benefit Ticker */}
-                    <PositioningStrip />
+                    {/* 2. What We Do (Visual Photo Showcase) */}
+                    <WhatWeDoShowcase onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 3. What We Offer (4 Clear Growth Pillars) */}
-                    <WhatWeOfferSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
+                    {/* 3. About Our Business & Client Results (Visual Split) */}
+                    <AboutAndResultsSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 4. Real Results & Case Outcomes */}
-                    <ResultsAndOutcomesSection onOpenConsultation={onOpenConsultation} />
+                    {/* 4. Flagship Product Spotlight: PropSouq AI */}
+                    <PropSouqCompactSpotlight onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 5. Flagship Product: PropSouq AI 3D Real Estate Showcase */}
-                    <PropSouqHomeShowcaseSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
-
-                    {/* 6. How We Help Your Business (The 3-Step Growth Sprint) */}
-                    <HowWeHelpSection onOpenConsultation={onOpenConsultation} />
-
-                    {/* 7. Industry Expertise */}
-                    <IndustrySection onOpenConsultation={onOpenConsultation} />
-
-                    {/* 8. Interactive Growth & ROI Planner */}
-                    <InteractiveGrowthPlanner onOpenConsultation={onOpenConsultation} />
-
-                    {/* 9. Why Eagle Stack Media */}
-                    <WhyEagleStackSection onOpenConsultation={onOpenConsultation} />
-
-                    {/* 10. Frequently Asked Questions */}
-                    <FaqSection />
-
-                    {/* 11. Final Call-to-Action */}
-                    <FinalCtaSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
-
-                    {/* 12. Direct Intake & Consultation Form */}
+                    {/* 5. Direct Consultation Intake Form */}
                     <ContactFormSection />
 
-                    {/* 13. Mobile Floating Quick Action Bar */}
+                    {/* 6. Mobile Floating Quick Bar */}
                     <MobileQuickBar onOpenConsultation={onOpenConsultation} />
                 </div>
             );
         }
 
         // =========================================================================
-        // HERO SECTION (Clear, Non-Technical, High-Converting 3D Experience)
+        // 1. HERO SECTION (Centered, Spacious, Impactful, Hover-Ready 3D Particles)
         // =========================================================================
         function HeroSection({ onNavigate, onOpenConsultation }) {
             return (
-                <section className="relative overflow-hidden pt-8 sm:pt-14 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* 3D WebGL Background Galaxy Canvas */}
+                <section className="relative overflow-hidden pt-16 sm:pt-24 pb-20 sm:pb-24 border-b border-forest/10">
+                    {/* Minimal 3D Hover-Ready Particle Field */}
                     <ThreeJsHeroEcosystem />
 
-                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-                        {/* Left Column: Clear Value Proposition */}
-                        <div className="lg:col-span-7 space-y-6 sm:space-y-8 text-left">
-                            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-forest/10 text-[11px] sm:text-xs font-bold text-forest uppercase tracking-widest shadow-soft">
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                                <span>DIGITAL GROWTH & AI AUTOMATION FOR BUSINESS</span>
-                            </div>
-
-                            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold text-forest tracking-tight leading-[1.12]">
-                                We Help Businesses Get More Clients, Save Time & <br className="hidden sm:inline" />
-                                <span className="gold-gradient-text">Scale Profitably.</span>
-                            </h1>
-
-                            <p className="text-base sm:text-lg text-muted leading-relaxed max-w-xl font-normal">
-                                Stop losing customers to slow replies and outdated websites. We combine <span className="text-forest font-semibold">targeted performance ads</span>, <span className="text-forest font-semibold">24/7 AI smart assistants</span>, and <span className="text-forest font-semibold">stunning 3D websites</span> that turn visitors into booked clients.
-                            </p>
-
-                            {/* Direct Action Buttons */}
-                            <div className="flex flex-wrap items-center gap-4 pt-1">
-                                <button
-                                    onClick={() => onOpenConsultation('Homepage Hero Consultation')}
-                                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-forest hover:bg-forest-deep text-white font-bold text-sm shadow-soft transition-all flex items-center justify-center gap-2 group btn-luxury-shimmer"
-                                >
-                                    <span>Book a Free 15-Min Growth Call</span>
-                                    <Icon name="arrow-up-right" className="w-4 h-4 text-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                </button>
-
-                                <button
-                                    onClick={() => {
-                                        const el = document.getElementById('what-we-offer');
-                                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                                    }}
-                                    className="w-full sm:w-auto px-7 py-4 rounded-xl bg-white/95 backdrop-blur-md border border-forest/15 hover:border-forest text-forest font-semibold text-sm shadow-soft transition-all flex items-center justify-center gap-2 group hover:bg-white"
-                                >
-                                    <span>Explore What We Do</span>
-                                    <Icon name="arrow-right" className="w-4 h-4 text-forest group-hover:translate-x-1 transition-transform" />
-                                </button>
-                            </div>
-
-                            {/* Real Proof Metrics Strip */}
-                            <div className="pt-6 border-t border-forest/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
-                                <div className="space-y-0.5">
-                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-forest">3.8x</div>
-                                    <div className="text-[11px] text-muted font-medium">Average Ad Return (ROAS)</div>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-gold-dark">10k+</div>
-                                    <div className="text-[11px] text-muted font-medium">Qualified Leads Generated</div>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-forest">&lt;60s</div>
-                                    <div className="text-[11px] text-muted font-medium">AI Instant Lead Reply</div>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-emerald-700">85%</div>
-                                    <div className="text-[11px] text-muted font-medium">Manual Follow-up Saved</div>
-                                </div>
-                            </div>
+                    <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+                        {/* Clean Minimal Eyebrow */}
+                        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-forest/10 text-[11px] sm:text-xs font-bold text-forest uppercase tracking-widest shadow-soft">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-badge"></span>
+                            <span>Digital Growth &bull; Modern Web &bull; AI Automation</span>
                         </div>
 
-                        {/* Right Column: Interactive 3D Live Experience Switcher */}
-                        <div className="lg:col-span-5 relative">
-                            <HeroInteractiveHub onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
+                        {/* Bold, Clear, Human Headline */}
+                        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold text-forest tracking-tight leading-[1.08]">
+                            Grow Your Business Faster. <br className="hidden sm:inline" />
+                            <span className="gold-gradient-text">With Smart Ads, Web &amp; AI.</span>
+                        </h1>
+
+                        {/* Concise Subtitle */}
+                        <p className="text-base sm:text-xl text-muted max-w-2xl mx-auto leading-relaxed font-normal">
+                            We help businesses attract ready-to-buy customers, launch conversion-focused websites, and automate follow-ups 24/7 &mdash; without any technical stress.
+                        </p>
+
+                        {/* Crisp Dual CTAs */}
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                            <button
+                                onClick={() => onOpenConsultation('Hero Consultation Request')}
+                                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-forest hover:bg-forest-deep text-white font-bold text-sm shadow-luxury transition-all flex items-center justify-center gap-2 group btn-luxury-shimmer"
+                            >
+                                <span>Book a Free Growth Call</span>
+                                <Icon name="arrow-up-right" className="w-4 h-4 text-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    const el = document.getElementById('what-we-do');
+                                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/95 backdrop-blur-md border border-forest/15 hover:border-forest text-forest font-semibold text-sm shadow-soft transition-all flex items-center justify-center gap-2 group hover:bg-white"
+                            >
+                                <span>See What We Do</span>
+                                <Icon name="arrow-right" className="w-4 h-4 text-forest group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+
+                        {/* Clean Proof Strip */}
+                        <div className="pt-10 max-w-3xl mx-auto border-t border-forest/10 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+                            <div>
+                                <div className="text-2xl sm:text-3xl font-display font-extrabold text-forest">3.8x</div>
+                                <div className="text-[11px] text-muted font-medium mt-0.5">Average Ad Return</div>
+                            </div>
+                            <div>
+                                <div className="text-2xl sm:text-3xl font-display font-extrabold text-gold-dark">10k+</div>
+                                <div className="text-[11px] text-muted font-medium mt-0.5">Client Leads Generated</div>
+                            </div>
+                            <div>
+                                <div className="text-2xl sm:text-3xl font-display font-extrabold text-forest">24/7</div>
+                                <div className="text-[11px] text-muted font-medium mt-0.5">AI Lead Response</div>
+                            </div>
+                            <div>
+                                <div className="text-2xl sm:text-3xl font-display font-extrabold text-emerald-700">7&ndash;14d</div>
+                                <div className="text-[11px] text-muted font-medium mt-0.5">Fast Launch Time</div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -1460,728 +1488,236 @@
         }
 
         // =========================================================================
-        // HERO INTERACTIVE 3D HUB (Switch between 3D Villa, AI Agent, Ad ROI, & Web)
+        // 2. WHAT WE DO (Visual Photo Cards - Instantly Clear & Non-Technical)
         // =========================================================================
-        function HeroInteractiveHub({ onNavigate, onOpenConsultation }) {
-            const [activeTab, setActiveTab] = useState('3d-villa');
-            const [activeFloor, setActiveFloor] = useState('all');
-            const [chatMessages, setChatMessages] = useState([
-                { from: 'user', text: 'Hi, I need more qualified leads for my business this month.' },
-                { from: 'bot', text: 'Hello! Our multi-channel ad funnels + instant 24/7 AI qualification typically generate 40-90 qualified inquiries within 14 days. Would you like to see a custom proposal?' }
-            ]);
-            const [chatInput, setChatInput] = useState('');
-            const [adSpend, setAdSpend] = useState(50000);
-
-            const handleSendSimulatedMsg = (text) => {
-                const msg = text || chatInput;
-                if (!msg.trim()) return;
-                setChatMessages(prev => [...prev, { from: 'user', text: msg }]);
-                setChatInput('');
-                setTimeout(() => {
-                    let reply = "Great! I have reserved a 15-minute slot for you. Click 'Book Free Growth Call' below to confirm your time!";
-                    if (msg.includes('pricing') || msg.includes('cost')) {
-                        reply = "Our tailored growth programs start with a zero-risk 30-day trial with clear milestone deliverables. No long-term lock-in!";
-                    } else if (msg.includes('3d') || msg.includes('real estate') || msg.includes('villa')) {
-                        reply = "PropSouq AI creates full 360\u00B0 virtual property tours with instant EMI calculators and floor plan explorers for builders!";
-                    }
-                    setChatMessages(prev => [...prev, { from: 'bot', text: reply }]);
-                }, 700);
-            };
-
-            return (
-                <div className="card-3d bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-6 border border-forest/10 shadow-card space-y-4 relative">
-                    {/* Header with Live Status */}
-                    <div className="flex items-center justify-between pb-3 border-b border-forest/10">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span className="text-xs font-bold text-forest uppercase tracking-wider font-mono">Live Interactive Demo</span>
-                        </div>
-                        <span className="text-[10px] font-mono text-gold-dark font-bold bg-gold/10 px-2 py-0.5 rounded-full border border-gold/30">
-                            TEST IN REAL TIME
-                        </span>
-                    </div>
-
-                    {/* Interactive Switcher Tabs */}
-                    <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#F8F7F2] border border-forest/10 text-[11px] font-bold">
-                        <button
-                            onClick={() => setActiveTab('3d-villa')}
-                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === '3d-villa' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
-                        >
-                            <span>Villa 3D</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('ai-agent')}
-                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === 'ai-agent' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
-                        >
-                            <span>AI Agent</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('ad-engine')}
-                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === 'ad-engine' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
-                        >
-                            <span>Ad ROI</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('speed-web')}
-                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === 'speed-web' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
-                        >
-                            <span>Web 99</span>
-                        </button>
-                    </div>
-
-                    {/* TAB 1: 3D Villa (PropSouq AI) */}
-                    {activeTab === '3d-villa' && (
-                        <div className="space-y-3">
-                            <div className="relative rounded-2xl overflow-hidden border border-forest/15">
-                                <ThreeJsArchitecturalViewer activeFloor={activeFloor} />
-                                <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 bg-forest/90 backdrop-blur-md p-1 rounded-xl border border-gold/30 text-[10px] font-mono text-white">
-                                    <button
-                                        onClick={() => setActiveFloor('all')}
-                                        className={`px-2 py-1 rounded-lg ${activeFloor === 'all' ? 'bg-gold text-forest font-bold' : 'hover:bg-white/10'}`}
-                                    >
-                                        Full
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveFloor('first')}
-                                        className={`px-2 py-1 rounded-lg ${activeFloor === 'first' ? 'bg-gold text-forest font-bold' : 'hover:bg-white/10'}`}
-                                    >
-                                        1st Fl
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveFloor('ground')}
-                                        className={`px-2 py-1 rounded-lg ${activeFloor === 'ground' ? 'bg-gold text-forest font-bold' : 'hover:bg-white/10'}`}
-                                    >
-                                        Ground
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between text-xs text-muted pt-1">
-                                <span className="flex items-center gap-1 text-forest font-semibold text-[11px]">
-                                    <Icon name="sparkles" className="w-3.5 h-3.5 text-gold" />
-                                    Touch or drag above to spin in 360&deg;
-                                </span>
-                                <a
-                                    href="propsouq.html"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="font-bold text-gold-dark hover:underline flex items-center gap-1"
-                                >
-                                    <span>Full Demo</span>
-                                    <Icon name="external-link" className="w-3 h-3" />
-                                </a>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* TAB 2: AI Smart Agent Simulator */}
-                    {activeTab === 'ai-agent' && (
-                        <div className="space-y-3">
-                            <div className="h-56 overflow-y-auto space-y-2 p-3 rounded-2xl bg-[#F8F7F2] border border-forest/10 text-xs font-sans">
-                                {chatMessages.map((m, idx) => (
-                                    <div key={idx} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[85%] p-2.5 rounded-2xl ${m.from === 'user' ? 'bg-forest text-white rounded-tr-none' : 'bg-white text-dark border border-forest/10 rounded-tl-none shadow-soft'}`}>
-                                            {m.from === 'bot' && (
-                                                <div className="flex items-center gap-1 text-[10px] text-gold-dark font-bold font-mono pb-0.5">
-                                                    <span>Eagle AI Assistant</span>
-                                                    <span className="text-[9px] text-emerald-600">&bull; 0.8s reply</span>
-                                                </div>
-                                            )}
-                                            <p className="leading-relaxed">{m.text}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            {/* Suggested Prompts */}
-                            <div className="flex flex-wrap gap-1.5 text-[10px]">
-                                <button
-                                    onClick={() => handleSendSimulatedMsg('How do you generate leads for real estate?')}
-                                    className="px-2.5 py-1 rounded-full bg-white border border-forest/10 hover:border-gold text-forest font-medium"
-                                >
-                                    Real Estate Leads?
-                                </button>
-                                <button
-                                    onClick={() => handleSendSimulatedMsg('Can this connect to my WhatsApp?')}
-                                    className="px-2.5 py-1 rounded-full bg-white border border-forest/10 hover:border-gold text-forest font-medium"
-                                >
-                                    WhatsApp Setup?
-                                </button>
-                                <button
-                                    onClick={() => handleSendSimulatedMsg('What is your pricing model?')}
-                                    className="px-2.5 py-1 rounded-full bg-white border border-forest/10 hover:border-gold text-forest font-medium"
-                                >
-                                    Pricing &amp; ROI?
-                                </button>
-                            </div>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSendSimulatedMsg(); }}
-                                    placeholder="Type a message to test the AI..."
-                                    className="flex-1 px-3 py-2 text-xs rounded-xl border border-forest/20 focus:outline-none focus:border-forest"
-                                />
-                                <button
-                                    onClick={() => handleSendSimulatedMsg()}
-                                    className="px-3.5 py-2 rounded-xl bg-forest text-gold font-bold text-xs"
-                                >
-                                    Send
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* TAB 3: Performance Ad Engine */}
-                    {activeTab === 'ad-engine' && (
-                        <div className="space-y-4 p-2">
-                            <div className="space-y-1.5">
-                                <div className="flex justify-between text-xs font-bold text-forest">
-                                    <span>Monthly Ad Budget</span>
-                                    <span className="font-mono text-gold-dark">&#8377;{adSpend.toLocaleString('en-IN')} / mo</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min="20000"
-                                    max="200000"
-                                    step="10000"
-                                    value={adSpend}
-                                    onChange={(e) => setAdSpend(Number(e.target.value))}
-                                    className="w-full accent-forest cursor-pointer"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 text-center">
-                                <div className="p-3 rounded-2xl bg-[#F8F7F2] border border-forest/10">
-                                    <div className="text-[10px] text-muted uppercase font-mono font-bold">Est. Qualified Leads</div>
-                                    <div className="text-2xl font-display font-extrabold text-forest mt-0.5">
-                                        {Math.round(adSpend / 650)} - {Math.round(adSpend / 450)}
-                                    </div>
-                                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">High-Intent Inquiries</div>
-                                </div>
-                                <div className="p-3 rounded-2xl bg-[#F8F7F2] border border-forest/10">
-                                    <div className="text-[10px] text-muted uppercase font-mono font-bold">Avg. Revenue Impact</div>
-                                    <div className="text-2xl font-display font-extrabold text-gold-dark mt-0.5">
-                                        &#8377;{(Math.round((adSpend * 3.8) / 1000) * 1000).toLocaleString('en-IN')}
-                                    </div>
-                                    <div className="text-[10px] text-muted font-medium mt-0.5">Based on 3.8x ROAS</div>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={() => onOpenConsultation('Ad Campaign Proposal')}
-                                className="w-full py-2.5 rounded-xl bg-forest hover:bg-forest-deep text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-soft"
-                            >
-                                <span>Get Custom Ad Strategy For Your Budget &rarr;</span>
-                            </button>
-                        </div>
-                    )}
-
-                    {/* TAB 4: High-Converting 3D Web */}
-                    {activeTab === 'speed-web' && (
-                        <div className="space-y-3 p-1">
-                            <div className="p-4 rounded-2xl bg-forest text-white space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
-                                        <span className="text-xs font-bold uppercase font-mono text-gold">Google Performance Score</span>
-                                    </div>
-                                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                                        Grade A+
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-around text-center py-2 border-y border-white/10">
-                                    <div>
-                                        <div className="text-2xl font-bold font-mono text-emerald-400">99</div>
-                                        <div className="text-[10px] text-ivory-dark">Performance</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold font-mono text-emerald-400">100</div>
-                                        <div className="text-[10px] text-ivory-dark">Accessibility</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold font-mono text-emerald-400">100</div>
-                                        <div className="text-[10px] text-ivory-dark">SEO Ready</div>
-                                    </div>
-                                </div>
-                                <p className="text-[11px] text-ivory-dark leading-relaxed">
-                                    Our websites load under 0.8 seconds and are optimized to capture leads directly to your WhatsApp and CRM.
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => onNavigate('web-development')}
-                                className="w-full py-2.5 rounded-xl bg-white border border-forest text-forest hover:bg-forest hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                            >
-                                <span>See Web-as-a-Service Plans &rarr;</span>
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Interactive Hub Footer */}
-                    <div className="pt-2 border-t border-forest/10 flex items-center justify-between text-[11px] text-muted">
-                        <span>Ready to scale your business?</span>
-                        <button
-                            onClick={() => onOpenConsultation('Interactive Hub Consultation')}
-                            className="text-forest font-bold hover:text-gold-dark hover:underline flex items-center gap-1"
-                        >
-                            <span>Book Consultation</span>
-                            <Icon name="arrow-right" className="w-3 h-3" />
-                        </button>
-                    </div>
-                </div>
-            );
-        }
-
-        // =========================================================================
-        // POSITIONING BENEFIT STRIP
-        // =========================================================================
-        function PositioningStrip() {
-            const benefits = [
-                "High-Intent Inquiries Only",
-                "24/7 AI Lead Qualification",
-                "3D Virtual Real Estate Showrooms",
-                "3.8x Average Return on Ad Spend",
-                "Instant WhatsApp & CRM Sync",
-                "Launch in 7 to 14 Days",
-                "Zero Long-Term Lock-in Contracts"
-            ];
-
-            return (
-                <div className="w-full bg-forest text-ivory py-4 border-y border-gold/30 overflow-hidden relative shadow-luxury">
-                    <div className="flex whitespace-nowrap animate-marquee gap-8 items-center text-xs sm:text-sm font-semibold tracking-wide">
-                        {[...benefits, ...benefits].map((b, i) => (
-                            <div key={i} className="flex items-center gap-3 shrink-0">
-                                <span className="text-gold font-bold">{b}</span>
-                                <span className="text-gold/40">&bull;</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-
-        // =========================================================================
-        // WHAT WE OFFER (The 4 Clear Pillars - Simple, Attractive, Non-Technical)
-        // =========================================================================
-        function WhatWeOfferSection({ onNavigate, onOpenConsultation }) {
-            const pillars = [
+        function WhatWeDoShowcase({ onNavigate, onOpenConsultation }) {
+            const services = [
                 {
                     id: 'performance-marketing',
-                    tag: 'ACQUISITION',
+                    tag: 'MARKETING & ADS',
                     title: 'Targeted Customer Ads',
-                    headline: 'Turn ad spend into paying clients.',
-                    desc: 'Stop wasting money on generic boost posts. We build high-performing Google & Meta ad funnels that put your offer directly in front of buyers ready to buy today.',
-                    benefits: [
-                        'Google Search Ads (Intent-driven buyers)',
-                        'Meta & Instagram Creative Campaigns',
-                        'High-converting landing page funnels',
-                        'Clear weekly ROI & cost-per-lead tracking'
-                    ],
-                    icon: 'target',
-                    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
-                    actionLabel: 'Explore Ad Strategy'
+                    desc: 'Google, Meta & Instagram campaigns engineered to bring serious buyers straight to your business.',
+                    img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80',
+                    cta: 'Explore Ads'
                 },
                 {
                     id: 'web-development',
-                    tag: 'CONVERSION',
-                    title: 'Websites That Actually Sell',
-                    headline: 'Fast, modern, built to convert.',
-                    desc: 'Your website is your best salesperson. We design stunning, lightning-fast 3D websites tailored to build instant credibility and turn casual visitors into booked calls.',
-                    benefits: [
-                        'Sub-second loading speed on smartphones',
-                        'Interactive 3D visuals & conversion psychology',
-                        'Direct WhatsApp & booking calendar integration',
-                        'Continuous updates & hosting included (WaaS)'
-                    ],
-                    icon: 'layout',
-                    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-                    actionLabel: 'View Web Plans'
+                    tag: 'WEB DESIGN',
+                    title: 'High-Converting Websites',
+                    desc: 'Modern, fast, mobile-friendly websites designed to build instant trust and turn visitors into booked calls.',
+                    img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80',
+                    cta: 'Explore Web'
                 },
                 {
                     id: 'ai-automation',
                     tag: 'AUTOMATION',
-                    title: '24/7 AI Smart Assistants',
-                    headline: 'Never lose a lead to slow replies.',
-                    desc: 'When potential clients reach out, they want answers now. Our AI assistants answer inquiries in 10 seconds, qualify buyer budgets, and book meetings into your calendar 24/7.',
-                    benefits: [
-                        'Instant WhatsApp & website chat response',
-                        'Automated lead qualification & scheduling',
-                        'Direct sync with HubSpot, Zoho, or Google Sheets',
-                        'Saves 100+ hours of repetitive manual data entry'
-                    ],
-                    icon: 'bot',
-                    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-                    actionLabel: 'Explore AI Agents'
+                    title: '24/7 AI Smart Agents',
+                    desc: 'Automated WhatsApp & chat assistants that answer questions instantly and book client meetings for you.',
+                    img: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80',
+                    cta: 'Explore AI'
                 },
                 {
                     id: 'propsouq-ai',
-                    tag: 'FLAGSHIP PRODUCT',
-                    title: 'PropSouq AI Real Estate Tech',
-                    headline: 'Interactive 3D property sales platform.',
-                    desc: "Don't just send boring PDF brochures. PropSouq AI gives builders and brokers an interactive 3D virtual sales experience where buyers explore villas, check floor plans, and book site visits.",
-                    benefits: [
-                        'Interactive 3D villa & architectural models',
-                        'Interactive EMI & mortgage calculators',
-                        'Branded digital client property portals',
-                        'Proven 3x higher site visit conversion'
-                    ],
-                    icon: 'home',
-                    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-                    actionLabel: 'Explore PropSouq AI'
+                    tag: 'REAL ESTATE TECH',
+                    title: 'PropSouq AI Platform',
+                    desc: 'Our flagship 3D virtual showroom software helping real estate builders & brokers close deals faster.',
+                    img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80',
+                    cta: 'Explore Product'
                 }
             ];
 
             return (
-                <section id="what-we-offer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">WHAT WE OFFER</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            The 4 Pillars of Your Digital Growth.
-                        </h2>
-                        <p className="text-base sm:text-lg text-muted leading-relaxed">
-                            Everything you need to acquire customers online, automate your sales process, and eliminate operational bottlenecks.
+                <section id="what-we-do" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div className="max-w-2xl space-y-2">
+                            <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">WHAT WE DO</span>
+                            <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
+                                Clear Solutions That Grow Your Business.
+                            </h2>
+                        </div>
+                        <p className="text-sm text-muted max-w-md">
+                            No confusing jargon &mdash; just the visual design, advertising, and automation tools your business needs to win more customers.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {pillars.map((p, idx) => (
-                            <div 
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {services.map((svc, idx) => (
+                            <div
                                 key={idx}
-                                className="card-3d bg-white/95 rounded-3xl p-6 sm:p-8 border border-forest/10 shadow-soft hover:shadow-card hover:border-gold/40 transition-all flex flex-col justify-between group"
+                                onClick={() => onNavigate(svc.id)}
+                                className="card-3d cursor-pointer bg-white rounded-3xl overflow-hidden border border-forest/10 shadow-soft hover:shadow-card hover:border-gold/50 transition-all flex flex-col justify-between group"
                             >
-                                <div className="space-y-5">
-                                    {/* Visual Banner */}
-                                    <div className="relative h-44 rounded-2xl overflow-hidden border border-forest/10">
-                                        <img 
-                                            src={p.image} 
-                                            alt={p.title} 
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                <div>
+                                    <div className="relative h-52 overflow-hidden">
+                                        <img
+                                            src={svc.img}
+                                            alt={svc.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                             loading="lazy"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/90 via-forest/30 to-transparent"></div>
-                                        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white">
-                                            <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-forest/80 border border-gold/30 text-gold uppercase font-bold">
-                                                {p.tag}
-                                            </span>
-                                            <div className="w-8 h-8 rounded-xl bg-forest/90 text-gold flex items-center justify-center border border-gold/20">
-                                                <Icon name={p.icon} className="w-4 h-4" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-2xl font-display font-bold text-forest">{p.title}</h3>
-                                        <div className="text-xs font-semibold text-gold-dark mt-0.5">{p.headline}</div>
-                                        <p className="text-xs sm:text-sm text-muted mt-2 leading-relaxed">{p.desc}</p>
-                                    </div>
-
-                                    <ul className="space-y-2.5 text-xs text-dark border-t border-forest/10 pt-4 font-medium">
-                                        {p.benefits.map((b, bIdx) => (
-                                            <li key={bIdx} className="flex items-center gap-2">
-                                                <span className="w-4 h-4 rounded-full bg-forest/5 text-forest flex items-center justify-center shrink-0">
-                                                    <Icon name="check" className="w-2.5 h-2.5 text-emerald-600 font-bold" />
-                                                </span>
-                                                <span>{b}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div className="pt-6 border-t border-forest/10 flex items-center justify-between mt-4">
-                                    <button
-                                        onClick={() => onNavigate(p.id)}
-                                        className="text-xs font-bold text-forest hover:text-gold-dark flex items-center gap-1.5 transition-colors"
-                                    >
-                                        <span>{p.actionLabel}</span>
-                                        <Icon name="arrow-right" className="w-3.5 h-3.5" />
-                                    </button>
-
-                                    <button
-                                        onClick={() => onOpenConsultation(`Consultation: ${p.title}`)}
-                                        className="px-4 py-2 rounded-xl bg-forest/5 hover:bg-forest hover:text-white text-forest text-xs font-bold transition-all"
-                                    >
-                                        Get Started
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // REAL RESULTS SECTION (Client Outcomes with Tangible Proof)
-        // =========================================================================
-        function ResultsAndOutcomesSection({ onOpenConsultation }) {
-            const results = [
-                {
-                    metric: '140+ Site Visits',
-                    timeframe: 'in 30 Days',
-                    industry: 'Real Estate Developer',
-                    title: 'Dharti Prangan Luxury Villas',
-                    problem: 'Static brochure downloads were generating low-intent leads with only a 4% follow-up show rate.',
-                    solution: 'Implemented PropSouq AI interactive 3D virtual tour + instant WhatsApp automated qualification.',
-                    outcome: 'Over 140 pre-qualified site visits booked with 35% higher closing rate.'
-                },
-                {
-                    metric: '320+ Patients',
-                    timeframe: 'Automated Bookings',
-                    industry: 'Healthcare Clinic',
-                    title: 'Multi-Specialty Healthcare',
-                    problem: 'Front desk missed 40% of inquiries coming in after 6 PM and during peak clinic hours.',
-                    solution: 'Deployed a 24/7 AI appointment assistant handling patient FAQs and doctor slot scheduling.',
-                    outcome: '320+ appointments scheduled after-hours with 0 additional administrative staff.'
-                },
-                {
-                    metric: '3.9x Ad Return',
-                    timeframe: 'Sustained ROAS',
-                    industry: 'B2B Professional Services',
-                    title: 'Corporate Advisory Firm',
-                    problem: 'High cost per lead and unqualified inquiries draining valuable consulting hours.',
-                    solution: 'Engineered high-intent Google Search campaigns paired with an automated multi-step qualification funnel.',
-                    outcome: 'Cost per qualified meeting dropped by 48% while maintaining a 3.9x ROI on ad spend.'
-                }
-            ];
-
-            return (
-                <section className="bg-forest text-ivory py-20 border-y border-forest-border tech-grid-pattern-dark relative overflow-hidden">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
-                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
-                            <div className="max-w-2xl space-y-2">
-                                <span className="text-xs font-mono font-bold text-gold uppercase tracking-widest">PROVEN TRACK RECORD</span>
-                                <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight">
-                                    Real Results for Growing Businesses.
-                                </h2>
-                                <p className="text-sm sm:text-base text-ivory-dark">
-                                    We measure our work by actual revenue pipeline, closed deals, and hours saved &mdash; not vanity metrics.
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => onOpenConsultation('Case Results Review')}
-                                className="px-6 py-3.5 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-xs shadow-luxury transition-all shrink-0"
-                            >
-                                Schedule Your Growth Audit &rarr;
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {results.map((r, i) => (
-                                <div key={i} className="bg-forest-deep rounded-3xl p-7 border border-white/10 shadow-2xl flex flex-col justify-between space-y-5 hover:border-gold/40 transition-colors">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between text-xs">
-                                            <span className="font-mono text-[10px] text-gold font-bold px-2 py-0.5 rounded bg-gold/10 border border-gold/30 uppercase">
-                                                {r.industry}
-                                            </span>
-                                            <span className="text-[10px] font-mono text-ivory-dark">{r.timeframe}</span>
-                                        </div>
-
-                                        <div className="space-y-1">
-                                            <div className="text-3xl font-display font-extrabold text-white">{r.metric}</div>
-                                            <div className="text-sm font-bold text-gold">{r.title}</div>
-                                        </div>
-
-                                        <div className="text-xs text-ivory-dark space-y-2 pt-2 border-t border-white/10">
-                                            <div>
-                                                <span className="font-bold text-white">Challenge:</span> {r.problem}
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-gold">Our System:</span> {r.solution}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-3.5 rounded-xl bg-forest/80 border border-emerald-500/30 text-xs font-medium text-emerald-300">
-                                        &check; <span className="font-bold text-white">Impact:</span> {r.outcome}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // HOW WE HELP YOUR BUSINESS (The 3-Step Growth Sprint)
-        // =========================================================================
-        function HowWeHelpSection({ onOpenConsultation }) {
-            const steps = [
-                {
-                    num: '01',
-                    title: 'Free Strategy Call & Audit',
-                    tag: 'DAY 1',
-                    desc: 'We review your current website, ad campaigns, and sales workflow to identify exactly where you are losing potential clients and revenue.',
-                    outcome: 'You receive a clear, actionable Growth Blueprint with zero sales pressure.'
-                },
-                {
-                    num: '02',
-                    title: 'Rapid Build & Launch',
-                    tag: 'DAYS 2 \u2013 10',
-                    desc: 'We design your conversion-ready 3D website, launch targeted Google/Meta ad funnels, or set up your 24/7 AI customer assistant.',
-                    outcome: 'Your new growth engine goes live with tracking and CRM integration in days, not months.'
-                },
-                {
-                    num: '03',
-                    title: 'Hands-Off Scaling & Optimization',
-                    tag: 'ONGOING',
-                    desc: 'We monitor ad spend, test creative messaging, and optimize your conversion rates weekly so your customer pipeline grows consistently.',
-                    outcome: 'Predictable high-intent leads and sales without you having to manage marketing yourself.'
-                }
-            ];
-
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">HOW WE HELP YOU</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            A Simple, 3-Step Growth Sprint.
-                        </h2>
-                        <p className="text-base sm:text-lg text-muted">
-                            No endless meetings, no technical headaches. Just clear deliverables and commercial results.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {steps.map((st, i) => (
-                            <div key={i} className="card-3d bg-white/95 rounded-3xl p-7 sm:p-8 border border-forest/10 shadow-soft flex flex-col justify-between space-y-6 hover:border-gold/40 transition-all">
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="text-3xl font-display font-extrabold text-gold-dark font-mono">{st.num}</div>
-                                        <span className="text-[10px] font-mono font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full">
-                                            {st.tag}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/80 via-transparent to-transparent"></div>
+                                        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md text-[10px] font-mono font-bold text-forest uppercase shadow-sm">
+                                            {svc.tag}
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-display font-bold text-forest">{st.title}</h3>
-                                    <p className="text-xs sm:text-sm text-muted leading-relaxed">{st.desc}</p>
+                                    <div className="p-6 space-y-2">
+                                        <h3 className="text-xl font-display font-bold text-forest group-hover:text-gold-dark transition-colors">
+                                            {svc.title}
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                                            {svc.desc}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="p-3.5 rounded-2xl bg-[#F8F7F2] border border-forest/10 text-xs text-forest">
-                                    <span className="font-bold text-gold-dark">Outcome:</span> {st.outcome}
+                                <div className="px-6 pb-6 pt-2 flex items-center justify-between text-xs font-bold text-forest">
+                                    <span>{svc.cta}</span>
+                                    <Icon name="arrow-right" className="w-4 h-4 text-gold-dark group-hover:translate-x-1 transition-transform" />
                                 </div>
                             </div>
                         ))}
-                    </div>
-
-                    <div className="text-center pt-2">
-                        <button
-                            onClick={() => onOpenConsultation('Growth Sprint Consultation')}
-                            className="px-8 py-4 rounded-xl bg-forest text-white font-bold text-sm hover:bg-forest-deep shadow-soft transition-all inline-flex items-center gap-2 btn-luxury-shimmer"
-                        >
-                            <span>Start Your 3-Step Growth Sprint Today</span>
-                            <Icon name="arrow-right" className="w-4 h-4 text-gold" />
-                        </button>
                     </div>
                 </section>
             );
         }
 
         // =========================================================================
-        // PROPSOUQ AI HOME SHOWCASE (Flagship 3D Real Estate Technology Product)
+        // 3. ABOUT OUR BUSINESS & CLIENT RESULTS (Visual Split Section)
         // =========================================================================
-        function PropSouqHomeShowcaseSection({ onNavigate, onOpenConsultation }) {
-            const [viewerFloor, setViewerFloor] = useState('all');
-
+        function AboutAndResultsSection({ onNavigate, onOpenConsultation }) {
             return (
-                <section className="bg-forest text-ivory py-20 border-y border-forest-border tech-grid-pattern-dark relative overflow-hidden">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
-                        {/* Section Header */}
-                        <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-8 pb-8 border-b border-white/10">
-                            <div className="max-w-2xl space-y-3">
-                                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-forest-deep text-gold border border-gold/30 text-xs font-bold uppercase tracking-widest font-mono">
-                                    <span className="w-2 h-2 rounded-full bg-gold pulse-badge"></span>
-                                    <span>OUR FLAGSHIP PRODUCT &bull; DEVELOPED BY EAGLE STACK</span>
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-white/95 rounded-3xl p-6 sm:p-10 lg:p-12 border border-forest/10 shadow-card grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                        {/* Left Visual Photography Column */}
+                        <div className="lg:col-span-6 relative">
+                            <div className="relative h-72 sm:h-[420px] rounded-2xl overflow-hidden border border-forest/10 shadow-luxury group">
+                                <img
+                                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1000&q=80"
+                                    alt="Eagle Stack Media Team Collaboration"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-forest-darker/85 via-transparent to-transparent"></div>
+                                <div className="absolute bottom-5 left-5 right-5 p-4 rounded-xl bg-white/95 backdrop-blur-md border border-gold/40 shadow-lg flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <div className="text-[10px] font-mono font-bold text-gold-dark uppercase">PROVEN CLIENT IMPACT</div>
+                                        <div className="text-sm font-display font-bold text-forest">140+ Site Visits &bull; 320+ Auto Bookings</div>
+                                    </div>
+                                    <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200">
+                                        Verified ROI
+                                    </span>
                                 </div>
-                                <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight leading-tight">
-                                    Don't Just List Properties. <br />
-                                    <span className="gold-dark-text">Sell Them Interactively.</span>
+                            </div>
+                        </div>
+
+                        {/* Right Business Story & Outcomes Column */}
+                        <div className="lg:col-span-6 space-y-6">
+                            <div className="space-y-3">
+                                <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">ABOUT OUR BUSINESS</span>
+                                <h2 className="text-3xl sm:text-4xl font-display font-extrabold text-forest tracking-tight leading-tight">
+                                    One Partner for Growth, Web Design &amp; Automation.
                                 </h2>
-                                <p className="text-base text-ivory-dark leading-relaxed pt-1">
-                                    <span className="text-gold font-bold">PropSouq AI</span> is our dedicated real estate sales software. It gives builders, developers, and brokers their own branded 3D interactive property portal where buyers explore floor plans, calculate EMIs, and book verified site visits.
+                                <p className="text-sm sm:text-base text-muted leading-relaxed">
+                                    Most agencies only run ads, and software developers only build code. At <strong className="text-forest">Eagle Stack Media</strong>, we bridge the gap &mdash; bringing you paying customers through high-intent marketing and automating your lead follow-ups so your team can focus on closing deals.
                                 </p>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-4 shrink-0">
+                            {/* Clean Visual Proof Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                                <div className="p-4 rounded-2xl bg-[#F8F7F2] border border-forest/10">
+                                    <div className="text-lg font-display font-extrabold text-forest">Real Estate</div>
+                                    <div className="text-xs text-muted mt-1">140+ buyer site visits booked in 30 days</div>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-[#F8F7F2] border border-forest/10">
+                                    <div className="text-lg font-display font-extrabold text-forest">Healthcare</div>
+                                    <div className="text-xs text-muted mt-1">320+ patient appointments automated 24/7</div>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-[#F8F7F2] border border-forest/10">
+                                    <div className="text-lg font-display font-extrabold text-forest">B2B &amp; Local</div>
+                                    <div className="text-xs text-muted mt-1">3.9x average return on ad spend</div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-4 pt-2">
+                                <button
+                                    onClick={() => onOpenConsultation('About Section Strategy Session')}
+                                    className="px-6 py-3.5 rounded-xl bg-forest hover:bg-forest-deep text-white font-bold text-xs shadow-soft transition-all flex items-center gap-2 btn-luxury-shimmer"
+                                >
+                                    <span>Partner With Us</span>
+                                    <Icon name="arrow-up-right" className="w-4 h-4 text-gold" />
+                                </button>
+                                <button
+                                    onClick={() => onNavigate('work')}
+                                    className="px-6 py-3.5 rounded-xl bg-white border border-forest/15 hover:border-forest text-forest font-bold text-xs transition-all flex items-center gap-1.5"
+                                >
+                                    <span>View Client Results &rarr;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // =========================================================================
+        // 4. PROPSOUQ AI SPOTLIGHT (Compact Visual Product Feature)
+        // =========================================================================
+        function PropSouqCompactSpotlight({ onNavigate, onOpenConsultation }) {
+            return (
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-forest text-ivory rounded-3xl p-8 sm:p-12 border border-gold/30 shadow-luxury grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative overflow-hidden">
+                        {/* Left Copy */}
+                        <div className="lg:col-span-6 space-y-5 relative z-10">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-forest-deep text-gold border border-gold/30 text-[10px] font-bold uppercase tracking-widest font-mono">
+                                <span className="w-2 h-2 rounded-full bg-gold pulse-badge"></span>
+                                <span>OUR FLAGSHIP PRODUCT</span>
+                            </div>
+
+                            <h2 className="text-3xl sm:text-4xl font-display font-extrabold text-white tracking-tight leading-tight">
+                                PropSouq AI &mdash; <br />
+                                <span className="gold-dark-text">Sell Properties Interactively.</span>
+                            </h2>
+
+                            <p className="text-sm sm:text-base text-ivory-dark leading-relaxed">
+                                Built specifically for real estate builders and brokers. Give every buyer an interactive 3D property experience, floor plan explorer, and instant EMI calculator right from their phone.
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-4 pt-2">
                                 <a
                                     href="propsouq.html"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-7 py-4 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-sm shadow-luxury transition-all flex items-center gap-2 btn-luxury-shimmer"
+                                    className="px-6 py-3.5 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-xs shadow-lg transition-all flex items-center gap-2 btn-luxury-shimmer"
                                 >
-                                    <span>Launch Interactive 3D Demo</span>
+                                    <span>Launch Live Interactive Demo</span>
                                     <Icon name="external-link" className="w-4 h-4 text-forest" />
                                 </a>
                                 <button
                                     onClick={() => onNavigate('propsouq-ai')}
-                                    className="px-6 py-4 rounded-xl bg-forest-card border border-white/10 hover:border-gold text-white font-semibold text-sm transition-all"
+                                    className="px-6 py-3.5 rounded-xl bg-forest-card border border-white/15 hover:border-gold text-white font-semibold text-xs transition-all"
                                 >
-                                    Learn About the Platform &rarr;
+                                    About PropSouq AI &rarr;
                                 </button>
                             </div>
                         </div>
 
-                        {/* Interactive 3D Villa Experience */}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                            <div className="lg:col-span-7 space-y-4">
-                                <div className="flex items-center justify-between text-xs text-ivory-dark">
-                                    <div className="flex items-center gap-2 font-mono">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                        <span className="text-white font-bold">Live 3D Villa Prototype &bull; Drag to Rotate</span>
-                                    </div>
-                                    <div className="flex gap-1.5">
-                                        <button
-                                            onClick={() => setViewerFloor('all')}
-                                            className={`px-3 py-1 rounded-lg text-[10px] font-mono ${viewerFloor === 'all' ? 'bg-gold text-forest font-bold' : 'bg-forest-deep text-white/70'}`}
-                                        >
-                                            Full Villa
-                                        </button>
-                                        <button
-                                            onClick={() => setViewerFloor('first')}
-                                            className={`px-3 py-1 rounded-lg text-[10px] font-mono ${viewerFloor === 'first' ? 'bg-gold text-forest font-bold' : 'bg-forest-deep text-white/70'}`}
-                                        >
-                                            1st Floor
-                                        </button>
-                                        <button
-                                            onClick={() => setViewerFloor('ground')}
-                                            className={`px-3 py-1 rounded-lg text-[10px] font-mono ${viewerFloor === 'ground' ? 'bg-gold text-forest font-bold' : 'bg-forest-deep text-white/70'}`}
-                                        >
-                                            Ground Floor
-                                        </button>
-                                    </div>
+                        {/* Right Luxury Real Estate Photo */}
+                        <div className="lg:col-span-6 relative z-10">
+                            <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden border border-white/15 shadow-2xl group">
+                                <img
+                                    src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80"
+                                    alt="PropSouq AI 3D Luxury Real Estate Showcase"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-forest-darker/80 via-transparent to-transparent"></div>
+                                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs">
+                                    <span className="px-3 py-1.5 rounded-lg bg-forest/90 backdrop-blur-md border border-gold/30 text-gold font-mono font-bold">
+                                        3D Virtual Villa Tour
+                                    </span>
+                                    <span className="px-3 py-1.5 rounded-lg bg-white/95 text-forest font-bold shadow-md">
+                                        Instant EMI Simulator
+                                    </span>
                                 </div>
-                                <ThreeJsArchitecturalViewer activeFloor={viewerFloor} />
-                            </div>
-
-                            {/* Value Proposition Points */}
-                            <div className="lg:col-span-5 space-y-4">
-                                <div className="p-5 rounded-2xl bg-forest-deep border border-white/10 space-y-2">
-                                    <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">01. 3D Virtual Showrooms</div>
-                                    <h4 className="text-lg font-display font-bold text-white">Give Buyers a Realistic Walkthrough</h4>
-                                    <p className="text-xs text-ivory-dark leading-relaxed">
-                                        Buyers can explore 3D villa models, inspect room dimensions, and check floor plans from anywhere in the world on their smartphone.
-                                    </p>
-                                </div>
-
-                                <div className="p-5 rounded-2xl bg-forest-deep border border-white/10 space-y-2">
-                                    <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">02. Instant EMI & Budget Calculator</div>
-                                    <h4 className="text-lg font-display font-bold text-white">Pre-Qualify Buyer Finances</h4>
-                                    <p className="text-xs text-ivory-dark leading-relaxed">
-                                        Interactive loan simulators calculate monthly payments in real-time, ensuring only serious, financially qualified buyers schedule site visits.
-                                    </p>
-                                </div>
-
-                                <div className="p-5 rounded-2xl bg-forest-deep border border-white/10 space-y-2">
-                                    <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">03. 100% Branded to Your Firm</div>
-                                    <h4 className="text-lg font-display font-bold text-white">Your Logo, Your Domain, Your Leads</h4>
-                                    <p className="text-xs text-ivory-dark leading-relaxed">
-                                        Unlike third-party portals where your leads are shared with competitors, PropSouq AI gives you an exclusive portal where 100% of inquiries belong to you.
-                                    </p>
-                                </div>
-
-                                <button
-                                    onClick={() => onOpenConsultation('PropSouq AI Builder Demo')}
-                                    className="w-full py-3.5 rounded-xl bg-gold text-forest font-bold text-xs hover:bg-gold-light transition-all flex items-center justify-center gap-2"
-                                >
-                                    <span>Request a Custom PropSouq AI Portal for Your Project &rarr;</span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -2190,352 +1726,7 @@
         }
 
         // =========================================================================
-        // INDUSTRY EXPERTISE SECTION (Clear, Targeted Applications)
-        // =========================================================================
-        function IndustrySection({ onOpenConsultation }) {
-            const industries = [
-                {
-                    title: 'Real Estate & Builders',
-                    tag: 'FLAGSHIP SECTOR',
-                    highlight: true,
-                    desc: '3D virtual property tours, buyer intent qualification, automated site visit booking, and ad funnels via our PropSouq AI platform.',
-                    metric: '3x higher site visit conversion'
-                },
-                {
-                    title: 'Healthcare & Clinics',
-                    tag: 'HEALTHCARE',
-                    highlight: false,
-                    desc: '24/7 patient intake automation, automated reminder sequences to eliminate no-shows, and local Google Search patient funnels.',
-                    metric: '85% fewer phone inquiries'
-                },
-                {
-                    title: 'Home & Local Services',
-                    tag: 'LOCAL SERVICES',
-                    highlight: false,
-                    desc: 'Local Google Ads, instant quote capture, automatic WhatsApp dispatch, and 5-star Google review collection on autopilot.',
-                    metric: '2.5x more quote requests'
-                },
-                {
-                    title: 'Professional & Legal Firms',
-                    tag: 'B2B CONSULTING',
-                    highlight: false,
-                    desc: 'Credibility-building 3D websites, client intake forms, automated consultation scheduling, and targeted LinkedIn/Google ads.',
-                    metric: '48% lower cost per client meeting'
-                },
-                {
-                    title: 'Coaching & Academies',
-                    tag: 'EDUCATION',
-                    highlight: false,
-                    desc: 'Student admission funnels, automated course eligibility screening, instant brochure dispatch, and WhatsApp enrollment counseling.',
-                    metric: '40% higher enrollment conversion'
-                },
-                {
-                    title: 'E-Commerce & Brands',
-                    tag: 'RETAIL',
-                    highlight: false,
-                    desc: 'Meta and Instagram performance ads, abandoned cart recovery workflows, high-speed conversion design, and customer retention.',
-                    metric: '3.8x sustained average ROAS'
-                }
-            ];
-
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">INDUSTRY EXPERTISE</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Tailored for Your Industry.
-                        </h2>
-                        <p className="text-base sm:text-lg text-muted">
-                            Every sector has unique customer behavior. Here is how our growth and automation systems deliver results in your market.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {industries.map((ind, i) => (
-                            <div
-                                key={i}
-                                className={`p-7 rounded-3xl border transition-all flex flex-col justify-between space-y-4 ${ind.highlight ? 'bg-forest text-white border-gold shadow-card' : 'bg-white/95 text-dark border-forest/10 shadow-soft hover:border-gold/40'}`}
-                            >
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-xl font-display font-bold">{ind.title}</h4>
-                                        <span className={`text-[9px] px-2.5 py-0.5 rounded font-mono font-bold uppercase ${ind.highlight ? 'bg-gold text-forest' : 'bg-forest/5 text-forest'}`}>
-                                            {ind.tag}
-                                        </span>
-                                    </div>
-                                    <p className={`text-xs sm:text-sm leading-relaxed ${ind.highlight ? 'text-ivory-dark' : 'text-muted'}`}>
-                                        {ind.desc}
-                                    </p>
-                                </div>
-                                <div className={`pt-3 border-t text-xs font-bold flex items-center justify-between ${ind.highlight ? 'border-white/10 text-gold' : 'border-forest/10 text-emerald-700'}`}>
-                                    <span>Outcome: {ind.metric}</span>
-                                    <button
-                                        onClick={() => onOpenConsultation(`Industry Strategy: ${ind.title}`)}
-                                        className="hover:underline text-[11px]"
-                                    >
-                                        Discuss &rarr;
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // INTERACTIVE GROWTH & ROI PLANNER (Engaging, Visual, Fun)
-        // =========================================================================
-        function InteractiveGrowthPlanner({ onOpenConsultation }) {
-            const [selectedIndustry, setSelectedIndustry] = useState('Real Estate');
-            const [targetLeads, setTargetLeads] = useState(50);
-
-            const calculateMetrics = () => {
-                let leadVal = 15000;
-                if (selectedIndustry === 'Real Estate') leadVal = 45000;
-                if (selectedIndustry === 'Healthcare') leadVal = 8000;
-                if (selectedIndustry === 'Services') leadVal = 12000;
-
-                const estRevenue = (targetLeads * leadVal * 0.15).toLocaleString('en-IN');
-                const hoursSaved = Math.round(targetLeads * 1.5);
-                return { estRevenue, hoursSaved };
-            };
-
-            const { estRevenue, hoursSaved } = calculateMetrics();
-
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white/95 rounded-3xl p-8 sm:p-12 border border-forest/15 shadow-card space-y-8">
-                        <div className="max-w-2xl space-y-2">
-                            <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">GROWTH CALCULATOR</span>
-                            <h2 className="text-2xl sm:text-4xl font-display font-extrabold text-forest">
-                                Plan Your Growth Targets.
-                            </h2>
-                            <p className="text-sm text-muted">
-                                Select your industry and desired monthly client inquiries to estimate your pipeline impact and operational hours saved.
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                            <div className="lg:col-span-7 space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-forest uppercase font-mono">1. Select Your Industry</label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {['Real Estate', 'Healthcare', 'Services'].map((ind) => (
-                                            <button
-                                                key={ind}
-                                                onClick={() => setSelectedIndustry(ind)}
-                                                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all border ${selectedIndustry === ind ? 'bg-forest text-white border-forest shadow-soft' : 'bg-white text-muted border-forest/10 hover:border-gold'}`}
-                                            >
-                                                {ind}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div className="flex justify-between text-xs font-bold text-forest">
-                                        <span>2. Monthly Qualified Inquiries Target</span>
-                                        <span className="font-mono text-gold-dark text-base">{targetLeads} Leads / mo</span>
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min="15"
-                                        max="150"
-                                        step="5"
-                                        value={targetLeads}
-                                        onChange={(e) => setTargetLeads(Number(e.target.value))}
-                                        className="w-full accent-forest cursor-pointer"
-                                    />
-                                    <div className="flex justify-between text-[10px] text-muted font-mono">
-                                        <span>15 Leads</span>
-                                        <span>75 Leads</span>
-                                        <span>150+ Leads</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="lg:col-span-5 bg-forest rounded-2xl p-6 text-white space-y-4 shadow-luxury">
-                                <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">Estimated Monthly Value</div>
-                                <div className="space-y-1">
-                                    <div className="text-3xl sm:text-4xl font-display font-extrabold text-white">
-                                        &#8377;{estRevenue}
-                                    </div>
-                                    <div className="text-xs text-ivory-dark">Projected New Pipeline Value</div>
-                                </div>
-                                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-                                    <span className="text-ivory-dark">Time Saved by AI Agents:</span>
-                                    <span className="font-bold text-emerald-400 font-mono">~{hoursSaved} Hours / mo</span>
-                                </div>
-                                <button
-                                    onClick={() => onOpenConsultation(`Target: ${targetLeads} Leads/mo in ${selectedIndustry}`)}
-                                    className="w-full py-3.5 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-xs shadow-soft transition-all"
-                                >
-                                    Claim This Growth Blueprint &rarr;
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // WHY EAGLE STACK MEDIA (Honest, Reliable, Commercial-First)
-        // =========================================================================
-        function WhyEagleStackSection({ onOpenConsultation }) {
-            const reasons = [
-                {
-                    title: 'Growth Marketing + AI Under One Roof',
-                    desc: 'Most agencies only run ads, while software developers only write code. We bridge the gap: generating qualified customer demand and automating the operations required to close them.'
-                },
-                {
-                    title: 'Real Revenue Pipeline, Not Vanity Likes',
-                    desc: 'We never report hollow impressions or irrelevant clicks. Every campaign and workflow is tied to real customer inquiries, booked appointments, and commercial ROI.'
-                },
-                {
-                    title: 'Our Own Battle-Tested Software',
-                    desc: 'We build and operate our own commercial platforms like PropSouq AI. Our clients benefit from production-grade code, reliable infrastructure, and cutting-edge 3D technology.'
-                },
-                {
-                    title: 'Fast Deployment in Days, Not Months',
-                    desc: 'No endless delay cycles or complicated retainers. We define a clear scope, build your ads, AI agent, or 3D website, and launch within 7 to 14 days.'
-                }
-            ];
-
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">THE ADVANTAGE</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Why Growing Businesses Choose Us.
-                        </h2>
-                        <p className="text-base text-muted">
-                            A dedicated technical growth partner designed to scale your operations without overhead.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {reasons.map((r, i) => (
-                            <div key={i} className="card-3d bg-white/95 rounded-3xl p-8 border border-forest/10 shadow-soft space-y-3 hover:border-gold/50 transition-colors">
-                                <div className="w-8 h-8 rounded-lg bg-forest/5 text-forest flex items-center justify-center font-bold text-sm">
-                                    0{i + 1}
-                                </div>
-                                <h3 className="text-xl font-display font-bold text-forest">{r.title}</h3>
-                                <p className="text-xs sm:text-sm text-muted leading-relaxed">{r.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // FAQS SECTION (Simple, Direct, Everyday Language)
-        // =========================================================================
-        function FaqSection() {
-            const [openIndex, setOpenIndex] = useState(0);
-
-            const faqs = [
-                {
-                    q: 'How quickly can we launch a campaign or website?',
-                    a: 'Most projects are ready to launch in 7 to 14 business days. Ad funnels and AI assistants can often go live in under a week once we receive your business details.'
-                },
-                {
-                    q: 'Do I need any technical knowledge to work with you?',
-                    a: 'Zero. We handle all the technical setup, hosting, AI configuration, and ad management for you. You only focus on handling the qualified customer inquiries and closing sales.'
-                },
-                {
-                    q: 'How does the 24/7 AI Smart Assistant work?',
-                    a: 'We connect an intelligent AI agent to your website and WhatsApp Business. When a customer reaches out, the AI replies instantly, answers their questions based on your verified business information, qualifies their budget, and schedules an appointment on your calendar.'
-                },
-                {
-                    q: 'What is PropSouq AI and is it only for real estate?',
-                    a: 'PropSouq AI is our flagship software developed specifically for real estate builders, brokers, and developers. It provides 3D virtual villa tours, interactive floor plans, and financial simulators to help close property sales faster.'
-                },
-                {
-                    q: 'How do we get started?',
-                    a: 'Simply click "Book a Free Consultation" or reach out via WhatsApp. We will hold a 15-minute discovery call to review your current business bottlenecks and outline a clear growth plan.'
-                }
-            ];
-
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">COMMON QUESTIONS</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Frequently Asked Questions.
-                        </h2>
-                        <p className="text-base text-muted">
-                            Transparent answers about how we partner with businesses.
-                        </p>
-                    </div>
-
-                    <div className="max-w-4xl space-y-4">
-                        {faqs.map((faq, idx) => (
-                            <div 
-                                key={idx} 
-                                className="bg-white/95 rounded-2xl border border-forest/10 overflow-hidden shadow-soft transition-all"
-                            >
-                                <button
-                                    onClick={() => setOpenIndex(openIndex === idx ? -1 : idx)}
-                                    className="w-full p-6 text-left flex items-center justify-between gap-4 font-display font-bold text-base sm:text-lg text-forest hover:text-gold-dark transition-colors"
-                                >
-                                    <span>{faq.q}</span>
-                                    <Icon name={openIndex === idx ? "chevron-up" : "chevron-down"} className="w-5 h-5 text-gold shrink-0" />
-                                </button>
-                                {openIndex === idx && (
-                                    <div className="px-6 pb-6 text-xs sm:text-sm text-muted leading-relaxed border-t border-forest/5 pt-4">
-                                        {faq.a}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // FINAL CALL TO ACTION SECTION
-        // =========================================================================
-        function FinalCtaSection({ onNavigate, onOpenConsultation }) {
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-forest rounded-3xl p-10 sm:p-16 border border-gold/40 shadow-luxury text-center space-y-6 relative overflow-hidden">
-                        <div className="max-w-3xl mx-auto space-y-4 relative z-10 text-ivory">
-                            <span className="text-[11px] font-mono uppercase text-gold font-bold tracking-widest">READY TO GROW?</span>
-                            <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight leading-tight">
-                                Let's Build Your Digital Growth Engine.
-                            </h2>
-                            <p className="text-base sm:text-lg text-ivory-dark leading-relaxed font-normal">
-                                Whether you need more high-ticket leads, automated 24/7 customer follow-ups, or our 3D PropSouq AI platform, we are ready to help your business scale.
-                            </p>
-                            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                                <button
-                                    onClick={() => onOpenConsultation('Final CTA Consultation')}
-                                    className="px-8 py-4 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-sm shadow-soft transition-all btn-luxury-shimmer"
-                                >
-                                    Book a Free Consultation
-                                </button>
-                                <a
-                                    href="propsouq.html"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-7 py-4 rounded-xl bg-forest-card border border-white/10 hover:border-gold text-white font-semibold text-sm transition-all flex items-center gap-2"
-                                >
-                                    <Icon name="external-link" className="w-4 h-4 text-gold" />
-                                    <span>Explore 3D PropSouq Demo</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // MOBILE STICKY QUICK ACTION BAR (Frictionless Mobile Conversion)
+        // MOBILE STICKY QUICK ACTION BAR
         // =========================================================================
         function MobileQuickBar({ onOpenConsultation }) {
             return (
