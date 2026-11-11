@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -402,114 +402,127 @@
                 if (!window.THREE || !containerRef.current) return;
 
                 const container = containerRef.current;
-                const width = container.clientWidth;
-                const height = container.clientHeight;
+                const width = container.clientWidth || window.innerWidth;
+                const height = container.clientHeight || 650;
 
                 const scene = new THREE.Scene();
                 const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                camera.position.set(0, 0, 26);
+                camera.position.set(0, 0, 28);
 
                 const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
                 renderer.setSize(width, height);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
                 container.innerHTML = '';
                 container.appendChild(renderer.domElement);
 
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                // Elegant Luxury Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
                 scene.add(ambientLight);
 
-                const pointLightGold = new THREE.PointLight(0xC6A15B, 1.8, 60);
-                pointLightGold.position.set(12, 12, 15);
+                const dirLight = new THREE.DirectionalLight(0xfffaed, 1.8);
+                dirLight.position.set(15, 20, 15);
+                scene.add(dirLight);
+
+                const pointLightGold = new THREE.PointLight(0xC6A15B, 2.5, 60);
+                pointLightGold.position.set(12, -8, 14);
                 scene.add(pointLightGold);
 
-                const pointLightEmerald = new THREE.PointLight(0x092B23, 2.5, 60);
-                pointLightEmerald.position.set(-15, -12, 10);
+                const pointLightEmerald = new THREE.PointLight(0x10b981, 2.0, 50);
+                pointLightEmerald.position.set(-16, 12, 10);
                 scene.add(pointLightEmerald);
 
-                const ecosystemGroup = new THREE.Group();
-                scene.add(ecosystemGroup);
+                const rootGroup = new THREE.Group();
+                scene.add(rootGroup);
 
-                // Layer 1: Outer Holographic Lattice (Icosahedron)
-                const outerGeo = new THREE.IcosahedronGeometry(7.5, 1);
-                const outerMat = new THREE.MeshBasicMaterial({
-                    color: 0x092B23,
-                    wireframe: true,
-                    transparent: true,
-                    opacity: 0.16
-                });
-                const outerMesh = new THREE.Mesh(outerGeo, outerMat);
-                ecosystemGroup.add(outerMesh);
-
-                // Layer 2: Inner Champagne Gold Luminous Core
-                const innerGeo = new THREE.OctahedronGeometry(4.2, 0);
-                const innerMat = new THREE.MeshStandardMaterial({
+                // Central Shiny Floating Tech Polyhedron (Faceted Gold Crystal)
+                const coreGeo = new THREE.IcosahedronGeometry(4.8, 1);
+                const coreMat = new THREE.MeshStandardMaterial({
                     color: 0xC6A15B,
-                    metalness: 0.8,
-                    roughness: 0.25,
-                    wireframe: true
+                    metalness: 0.85,
+                    roughness: 0.22,
+                    flatShading: true
                 });
-                const innerMesh = new THREE.Mesh(innerGeo, innerMat);
-                ecosystemGroup.add(innerMesh);
+                const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+                rootGroup.add(coreMesh);
 
-                // Central Core Nucleus
-                const nucleusGeo = new THREE.SphereGeometry(1.6, 16, 16);
-                const nucleusMat = new THREE.MeshBasicMaterial({
+                // Outer Emerald Wireframe Lattice
+                const cageGeo = new THREE.IcosahedronGeometry(7.2, 1);
+                const cageMat = new THREE.MeshBasicMaterial({
                     color: 0x092B23,
                     wireframe: true,
                     transparent: true,
-                    opacity: 0.35
+                    opacity: 0.22
                 });
-                const nucleus = new THREE.Mesh(nucleusGeo, nucleusMat);
-                ecosystemGroup.add(nucleus);
+                const cageMesh = new THREE.Mesh(cageGeo, cageMat);
+                rootGroup.add(cageMesh);
 
-                // Orbiting Stage Nodes
-                const stageNames = ["Marketing", "Leads", "AI Automation", "Sales", "Platforms"];
-                const orbitingNodes = [];
-                const stageRadii = [9.2, 10.4, 9.8, 10.8, 9.5];
-                const stageAngles = [0, (Math.PI * 2) / 5, (Math.PI * 4) / 5, (Math.PI * 6) / 5, (Math.PI * 8) / 5];
+                // Orbiting Luxury Rings
+                const ring1Geo = new THREE.TorusGeometry(8.5, 0.08, 16, 100);
+                const ring1Mat = new THREE.MeshStandardMaterial({ color: 0xC6A15B, metalness: 0.9, roughness: 0.1 });
+                const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+                ring1.rotation.x = Math.PI / 3;
+                rootGroup.add(ring1);
 
-                for (let i = 0; i < 5; i++) {
-                    const nodeGroup = new THREE.Group();
-                    const sphereGeo = new THREE.SphereGeometry(0.55, 16, 16);
-                    const sphereMat = new THREE.MeshStandardMaterial({
-                        color: i % 2 === 0 ? 0xC6A15B : 0x092B23,
-                        metalness: 0.6,
-                        roughness: 0.3
+                const ring2Geo = new THREE.TorusGeometry(10.2, 0.06, 16, 100);
+                const ring2Mat = new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.7, roughness: 0.2 });
+                const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+                ring2.rotation.y = Math.PI / 4;
+                rootGroup.add(ring2);
+
+                // Luminous Particle Galaxy (280 floating stars)
+                const particleCount = 280;
+                const particleGeo = new THREE.BufferGeometry();
+                const posArray = new Float32Array(particleCount * 3);
+                for (let i = 0; i < particleCount * 3; i += 3) {
+                    posArray[i] = (Math.random() - 0.5) * 55;
+                    posArray[i + 1] = (Math.random() - 0.5) * 45;
+                    posArray[i + 2] = (Math.random() - 0.5) * 35;
+                }
+                particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                const particleMat = new THREE.PointsMaterial({
+                    size: 0.22,
+                    color: 0xC6A15B,
+                    transparent: true,
+                    opacity: 0.65
+                });
+                const particleMesh = new THREE.Points(particleGeo, particleMat);
+                scene.add(particleMesh);
+
+                // Orbiting satellite data nodes
+                const satellites = [];
+                const satRadii = [8.5, 9.6, 10.8, 11.5];
+                const satSpeeds = [0.007, 0.005, 0.004, 0.006];
+                for (let i = 0; i < 4; i++) {
+                    const satGeo = new THREE.SphereGeometry(0.5, 16, 16);
+                    const satMat = new THREE.MeshStandardMaterial({
+                        color: i % 2 === 0 ? 0xC6A15B : 0x10b981,
+                        metalness: 0.8,
+                        roughness: 0.2
                     });
-                    const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-                    nodeGroup.add(sphere);
-
-                    const ringGeo = new THREE.RingGeometry(0.7, 0.85, 24);
-                    const ringMat = new THREE.MeshBasicMaterial({
-                        color: 0xC6A15B,
-                        side: THREE.DoubleSide,
-                        transparent: true,
-                        opacity: 0.4
-                    });
-                    const ring = new THREE.Mesh(ringGeo, ringMat);
-                    ring.rotation.x = Math.PI / 2;
-                    nodeGroup.add(ring);
-
-                    ecosystemGroup.add(nodeGroup);
-                    orbitingNodes.push({
-                        group: nodeGroup,
-                        radius: stageRadii[i],
-                        angle: stageAngles[i],
-                        speed: 0.003 + (i * 0.001)
+                    const satMesh = new THREE.Mesh(satGeo, satMat);
+                    rootGroup.add(satMesh);
+                    satellites.push({
+                        mesh: satMesh,
+                        radius: satRadii[i],
+                        speed: satSpeeds[i],
+                        angle: (i * Math.PI) / 2
                     });
                 }
 
-                // Interactive Mouse tracking
-                let targetRotX = 0;
-                let targetRotY = 0;
-                const handleMouseMove = (e) => {
+                // Interactive Mouse & Touch Tracking
+                let targetX = 0, targetY = 0;
+                const onPointerMove = (e) => {
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                     const rect = container.getBoundingClientRect();
-                    const x = ((e.clientX - rect.left) / width) * 2 - 1;
-                    const y = -(((e.clientY - rect.top) / height) * 2 - 1);
-                    targetRotY = x * 0.45;
-                    targetRotX = -y * 0.3;
+                    const x = ((clientX - rect.left) / width) * 2 - 1;
+                    const y = -(((clientY - rect.top) / height) * 2 - 1);
+                    targetY = x * 0.55;
+                    targetX = -y * 0.35;
                 };
-                window.addEventListener('mousemove', handleMouseMove);
+
+                window.addEventListener('mousemove', onPointerMove, { passive: true });
+                window.addEventListener('touchmove', onPointerMove, { passive: true });
 
                 let isVisible = true;
                 const observer = new IntersectionObserver(([entry]) => {
@@ -518,27 +531,30 @@
                 observer.observe(container);
 
                 const clock = new THREE.Clock();
-                let animationId;
+                let animId;
                 const animate = () => {
-                    animationId = requestAnimationFrame(animate);
-                    if (!isVisible) return; // Skip heavy rendering calculations when scrolled away
-                    const elapsedTime = clock.getElapsedTime();
+                    animId = requestAnimationFrame(animate);
+                    if (!isVisible) return;
+                    const elapsed = clock.getElapsedTime();
 
-                    ecosystemGroup.rotation.y += (targetRotY - ecosystemGroup.rotation.y) * 0.04 + 0.002;
-                    ecosystemGroup.rotation.x += (targetRotX - ecosystemGroup.rotation.x) * 0.04;
+                    rootGroup.rotation.y += (targetY - rootGroup.rotation.y) * 0.05 + 0.002;
+                    rootGroup.rotation.x += (targetX - rootGroup.rotation.x) * 0.05;
 
-                    outerMesh.rotation.y = elapsedTime * 0.08;
-                    outerMesh.rotation.z = elapsedTime * 0.05;
-                    innerMesh.rotation.y = -elapsedTime * 0.12;
+                    coreMesh.rotation.y = elapsed * 0.15;
+                    coreMesh.rotation.x = elapsed * 0.1;
+                    cageMesh.rotation.y = -elapsed * 0.08;
 
-                    for (let i = 0; i < orbitingNodes.length; i++) {
-                        const node = orbitingNodes[i];
-                        node.angle += node.speed;
-                        node.group.position.x = Math.cos(node.angle) * node.radius;
-                        node.group.position.z = Math.sin(node.angle) * node.radius;
-                        node.group.position.y = Math.sin(elapsedTime * 1.5 + i) * 1.6;
-                        node.group.rotation.y += 0.02;
-                    }
+                    ring1.rotation.z = elapsed * 0.12;
+                    ring2.rotation.z = -elapsed * 0.1;
+
+                    particleMesh.rotation.y = elapsed * 0.02;
+
+                    satellites.forEach((sat, idx) => {
+                        sat.angle += sat.speed;
+                        sat.mesh.position.x = Math.cos(sat.angle) * sat.radius;
+                        sat.mesh.position.z = Math.sin(sat.angle) * sat.radius;
+                        sat.mesh.position.y = Math.sin(elapsed * 2 + idx) * 1.5;
+                    });
 
                     renderer.render(scene, camera);
                 };
@@ -546,24 +562,31 @@
 
                 const handleResize = () => {
                     if (!container) return;
-                    const newW = container.clientWidth;
-                    const newH = container.clientHeight;
-                    camera.aspect = newW / newH;
+                    const w = container.clientWidth;
+                    const h = container.clientHeight;
+                    camera.aspect = w / h;
                     camera.updateProjectionMatrix();
-                    renderer.setSize(newW, newH);
+                    renderer.setSize(w, h);
                 };
                 window.addEventListener('resize', handleResize);
 
                 return () => {
-                    cancelAnimationFrame(animationId);
+                    cancelAnimationFrame(animId);
                     observer.disconnect();
-                    window.removeEventListener('mousemove', handleMouseMove);
+                    window.removeEventListener('mousemove', onPointerMove);
+                    window.removeEventListener('touchmove', onPointerMove);
                     window.removeEventListener('resize', handleResize);
                     renderer.dispose();
                 };
             }, []);
 
-            return <div ref={containerRef} className="absolute inset-0 pointer-events-none opacity-80 z-0" />;
+            return (
+                <div 
+                    ref={containerRef} 
+                    className="absolute inset-0 pointer-events-none opacity-85 z-0 overflow-hidden" 
+                    aria-hidden="true"
+                />
+            );
         }
 
         // =========================================================================
@@ -1279,181 +1302,125 @@
         }
 
         // =========================================================================
-        // 5. PAGE 1: HOME SCREEN (With All 10 Required Sections)
+        // 5. PAGE 1: HOME SCREEN (Attractive 3D, Outcome-Focused, Non-Technical)
         // =========================================================================
         function HomeScreen({ onNavigate, onOpenConsultation }) {
             return (
-                <div className="space-y-28 pb-20">
-                    {/* 1. Hero Section */}
+                <div className="space-y-24 sm:space-y-32 pb-24">
+                    {/* 1. Hero Section with Interactive 3D Hub */}
                     <HeroSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 2. Positioning Strip */}
+                    {/* 2. Positioning Benefit Ticker */}
                     <PositioningStrip />
 
-                    {/* 3. Business Challenges We Solve */}
-                    <BusinessChallengesSection onOpenConsultation={onOpenConsultation} />
+                    {/* 3. What We Offer (4 Clear Growth Pillars) */}
+                    <WhatWeOfferSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 4. Our Core Services */}
-                    <CoreServicesSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
+                    {/* 4. Real Results & Case Outcomes */}
+                    <ResultsAndOutcomesSection onOpenConsultation={onOpenConsultation} />
 
-                    {/* 5. How We Work (5-Step Execution Blueprint) */}
-                    <HowWeWorkSection />
-
-                    {/* 6. Flagship Product: PropSouq AI Showcase */}
+                    {/* 5. Flagship Product: PropSouq AI 3D Real Estate Showcase */}
                     <PropSouqHomeShowcaseSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 7. Industries We Serve */}
+                    {/* 6. How We Help Your Business (The 3-Step Growth Sprint) */}
+                    <HowWeHelpSection onOpenConsultation={onOpenConsultation} />
+
+                    {/* 7. Industry Expertise */}
                     <IndustrySection onOpenConsultation={onOpenConsultation} />
 
-                    {/* 8. Why Eagle Stack Media */}
+                    {/* 8. Interactive Growth & ROI Planner */}
+                    <InteractiveGrowthPlanner onOpenConsultation={onOpenConsultation} />
+
+                    {/* 9. Why Eagle Stack Media */}
                     <WhyEagleStackSection onOpenConsultation={onOpenConsultation} />
 
-                    {/* 9. Implementation Process */}
-                    <ImplementationProcessSection />
-
-                    {/* 10. Frequently Asked Questions (FAQs) */}
+                    {/* 10. Frequently Asked Questions */}
                     <FaqSection />
 
-                    {/* 11. Final Consultation CTA */}
+                    {/* 11. Final Call-to-Action */}
                     <FinalCtaSection onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
 
-                    {/* 12. Lead Generation Consultation Form */}
+                    {/* 12. Direct Intake & Consultation Form */}
                     <ContactFormSection />
+
+                    {/* 13. Mobile Floating Quick Action Bar */}
+                    <MobileQuickBar onOpenConsultation={onOpenConsultation} />
                 </div>
             );
         }
 
         // =========================================================================
-        // HERO SECTION (Exactly Matching Master Prompt Headline, Copy & CTAs)
+        // HERO SECTION (Clear, Non-Technical, High-Converting 3D Experience)
         // =========================================================================
         function HeroSection({ onNavigate, onOpenConsultation }) {
             return (
-                <section className="relative overflow-hidden pt-10 sm:pt-16 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* 3D WebGL Growth Ecosystem Canvas */}
+                <section className="relative overflow-hidden pt-8 sm:pt-14 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* 3D WebGL Background Galaxy Canvas */}
                     <ThreeJsHeroEcosystem />
 
-                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                        {/* Left Column: Primary Positioning */}
-                        <div className="lg:col-span-7 space-y-7">
-                            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-forest/10 text-[11px] font-bold text-forest uppercase tracking-widest shadow-soft">
-                                <span className="w-2 h-2 rounded-full bg-gold pulse-badge"></span>
-                                <span>DIGITAL GROWTH × AI AUTOMATION</span>
+                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                        {/* Left Column: Clear Value Proposition */}
+                        <div className="lg:col-span-7 space-y-6 sm:space-y-8 text-left">
+                            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-forest/10 text-[11px] sm:text-xs font-bold text-forest uppercase tracking-widest shadow-soft">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                <span>DIGITAL GROWTH & AI AUTOMATION FOR BUSINESS</span>
                             </div>
 
-                            {/* Exact Headline from Prompt */}
-                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold text-forest tracking-tight leading-[1.08]">
-                                Grow Your Business. <br />
-                                <span className="gold-gradient-text">Automate What Slows You Down.</span>
+                            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold text-forest tracking-tight leading-[1.12]">
+                                We Help Businesses Get More Clients, Save Time & <br className="hidden sm:inline" />
+                                <span className="gold-gradient-text">Scale Profitably.</span>
                             </h1>
 
-                            {/* Exact Supporting Copy from Prompt */}
                             <p className="text-base sm:text-lg text-muted leading-relaxed max-w-xl font-normal">
-                                Eagle Stack Media combines performance marketing, digital experiences, and AI-powered automation to help businesses generate leads, improve operations, and scale.
+                                Stop losing customers to slow replies and outdated websites. We combine <span className="text-forest font-semibold">targeted performance ads</span>, <span className="text-forest font-semibold">24/7 AI smart assistants</span>, and <span className="text-forest font-semibold">stunning 3D websites</span> that turn visitors into booked clients.
                             </p>
 
-                            {/* Primary & Secondary CTAs from Prompt */}
-                            <div className="flex flex-wrap items-center gap-4 pt-2">
+                            {/* Direct Action Buttons */}
+                            <div className="flex flex-wrap items-center gap-4 pt-1">
                                 <button
                                     onClick={() => onOpenConsultation('Homepage Hero Consultation')}
-                                    className="px-8 py-4 rounded-xl bg-forest hover:bg-forest-deep text-white font-bold text-sm shadow-soft transition-all flex items-center gap-2 group btn-luxury-shimmer"
+                                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-forest hover:bg-forest-deep text-white font-bold text-sm shadow-soft transition-all flex items-center justify-center gap-2 group btn-luxury-shimmer"
                                 >
-                                    <span>Book a Consultation</span>
+                                    <span>Book a Free 15-Min Growth Call</span>
                                     <Icon name="arrow-up-right" className="w-4 h-4 text-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                                 </button>
 
                                 <button
-                                    onClick={() => onNavigate('digital-marketing')}
-                                    className="px-7 py-4 rounded-xl bg-white/95 backdrop-blur-md border border-forest/15 hover:border-forest text-forest font-semibold text-sm shadow-soft transition-all flex items-center gap-2 group hover:bg-white"
+                                    onClick={() => {
+                                        const el = document.getElementById('what-we-offer');
+                                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                    }}
+                                    className="w-full sm:w-auto px-7 py-4 rounded-xl bg-white/95 backdrop-blur-md border border-forest/15 hover:border-forest text-forest font-semibold text-sm shadow-soft transition-all flex items-center justify-center gap-2 group hover:bg-white"
                                 >
-                                    <span>Explore Our Solutions</span>
+                                    <span>Explore What We Do</span>
                                     <Icon name="arrow-right" className="w-4 h-4 text-forest group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </div>
 
-                            {/* 3 Core Value Pillars */}
-                            <div className="pt-6 border-t border-forest/10 flex flex-wrap items-center gap-6 text-xs font-semibold text-muted">
-                                <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-forest"></span>
-                                    <span className="text-dark">Acquire Customers Online</span>
+                            {/* Real Proof Metrics Strip */}
+                            <div className="pt-6 border-t border-forest/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+                                <div className="space-y-0.5">
+                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-forest">3.8x</div>
+                                    <div className="text-[11px] text-muted font-medium">Average Ad Return (ROAS)</div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-gold"></span>
-                                    <span className="text-dark">Automate Business Workflows</span>
+                                <div className="space-y-0.5">
+                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-gold-dark">10k+</div>
+                                    <div className="text-[11px] text-muted font-medium">Qualified Leads Generated</div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                                    <span className="text-dark">Develop Industry Platforms</span>
+                                <div className="space-y-0.5">
+                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-forest">&lt;60s</div>
+                                    <div className="text-[11px] text-muted font-medium">AI Instant Lead Reply</div>
+                                </div>
+                                <div className="space-y-0.5">
+                                    <div className="text-2xl sm:text-3xl font-display font-extrabold text-emerald-700">85%</div>
+                                    <div className="text-[11px] text-muted font-medium">Manual Follow-up Saved</div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Right Column: Connected Operating Architecture Composition */}
-                        <div className="lg:col-span-5 relative card-3d-wrap">
-                            <div className="card-3d bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-7 border border-forest/10 shadow-card space-y-4 relative">
-                                <div className="flex items-center justify-between pb-3 border-b border-forest/10 text-xs">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
-                                        <span className="font-bold text-forest">Digital Growth Architecture</span>
-                                    </div>
-                                    <span className="text-[10px] font-mono text-muted">OPERATIONAL PIPELINE</span>
-                                </div>
-
-                                {/* Rich Visual Image Preview */}
-                                <div className="relative h-32 rounded-2xl overflow-hidden border border-forest/10 group">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80" 
-                                        alt="Eagle Stack Growth Platform Preview" 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        loading="eager"
-                                        decoding="async"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-forest-darker/90 via-forest/40 to-transparent"></div>
-                                    <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white">
-                                        <div className="flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                            <span className="text-[11px] font-mono font-bold tracking-wider uppercase">Live Acquisition Engine</span>
-                                        </div>
-                                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gold/20 text-gold border border-gold/40">Enterprise</span>
-                                    </div>
-                                </div>
-
-                                <div className="p-3.5 rounded-2xl bg-[#F8F7F2] border border-forest/10 text-[11px] font-mono flex items-center justify-between text-forest">
-                                    <span className="font-bold">Marketing</span>
-                                    <Icon name="arrow-right" className="w-3 h-3 text-gold" />
-                                    <span className="font-bold">Leads</span>
-                                    <Icon name="arrow-right" className="w-3 h-3 text-gold" />
-                                    <span className="font-bold">AI Automation</span>
-                                    <Icon name="arrow-right" className="w-3 h-3 text-gold" />
-                                    <span className="font-bold">Sales</span>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 text-xs">
-                                    <div className="p-3.5 rounded-2xl bg-white border border-forest/10 shadow-soft">
-                                        <div className="text-[10px] text-muted font-mono uppercase">Acquisition</div>
-                                        <div className="text-sm font-display font-bold text-forest mt-1">Multi-Channel Ads</div>
-                                        <div className="text-[11px] text-muted mt-0.5">Google, Meta & LinkedIn</div>
-                                    </div>
-                                    <div className="p-3.5 rounded-2xl bg-white border border-forest/10 shadow-soft">
-                                        <div className="text-[10px] text-muted font-mono uppercase">Qualification</div>
-                                        <div className="text-sm font-display font-bold text-forest mt-1">Autonomous AI</div>
-                                        <div className="text-[11px] text-gold-dark mt-0.5">24/7 Response Speed</div>
-                                    </div>
-                                    <div className="p-3.5 rounded-2xl bg-white border border-forest/10 shadow-soft">
-                                        <div className="text-[10px] text-muted font-mono uppercase">Platforms</div>
-                                        <div className="text-sm font-display font-bold text-forest mt-1">Managed WaaS</div>
-                                        <div className="text-[11px] text-muted mt-0.5">Engineered to Convert</div>
-                                    </div>
-                                    <div className="p-3.5 rounded-2xl bg-white border border-gold/40 shadow-soft bg-gold/5">
-                                        <div className="text-[10px] text-gold-dark font-mono uppercase font-bold">Flagship Vertical</div>
-                                        <div className="text-sm font-display font-bold text-forest mt-1">PropSouq AI</div>
-                                        <div className="text-[11px] text-emerald-800 font-semibold mt-0.5">Real Estate Tech</div>
-                                    </div>
-                                </div>
-
-                                <div className="p-3 rounded-xl bg-forest/5 text-[10px] text-muted text-center font-mono">
-                                    Integrated digital infrastructure engineered for growing businesses.
-                                </div>
-                            </div>
+                        {/* Right Column: Interactive 3D Live Experience Switcher */}
+                        <div className="lg:col-span-5 relative">
+                            <HeroInteractiveHub onNavigate={onNavigate} onOpenConsultation={onOpenConsultation} />
                         </div>
                     </div>
                 </section>
@@ -1461,399 +1428,448 @@
         }
 
         // =========================================================================
-        // POSITIONING STRIP
+        // HERO INTERACTIVE 3D HUB (Switch between 3D Villa, AI Agent, Ad ROI, & Web)
         // =========================================================================
-        function PositioningStrip() {
-            const capabilities = [
-                "Digital Marketing Strategy",
-                "Performance Marketing Funnels",
-                "AI Automation & Workflows",
-                "Custom AI Agents",
-                "Web-as-a-Service (WaaS)",
-                "PropSouq AI Real Estate Platform"
-            ];
+        function HeroInteractiveHub({ onNavigate, onOpenConsultation }) {
+            const [activeTab, setActiveTab] = useState('3d-villa'); // '3d-villa' | 'ai-agent' | 'ad-engine' | 'speed-web'
+            const [activeFloor, setActiveFloor] = useState('all');
+            const [chatMessages, setChatMessages] = useState([
+                { from: 'user', text: 'Hi, I need more qualified leads for my business this month.' },
+                { from: 'bot', text: 'Hello! Our multi-channel ad funnels + instant 24/7 AI qualification typically generate 40-90 qualified inquiries within 14 days. Would you like to see a custom proposal?' }
+            ]);
+            const [chatInput, setChatInput] = useState('');
+            const [adSpend, setAdSpend] = useState(50000); // INR or USD equivalent
+
+            const handleSendSimulatedMsg = (text) => {
+                const msg = text || chatInput;
+                if (!msg.trim()) return;
+                setChatMessages(prev => [...prev, { from: 'user', text: msg }]);
+                setChatInput('');
+                setTimeout(() => {
+                    let reply = "Great! I have reserved a 15-minute slot for you. Click 'Book Free Growth Call' below to confirm your time!";
+                    if (msg.includes('pricing') || msg.includes('cost')) {
+                        reply = "Our tailored growth programs start with a zero-risk 30-day trial with clear milestone deliverables. No long-term lock-in!";
+                    } else if (msg.includes('3d') || msg.includes('real estate') || msg.includes('villa')) {
+                        reply = "PropSouq AI creates full 360Â° virtual property tours with instant EMI calculators and floor plan explorers for builders!";
+                    }
+                    setChatMessages(prev => [...prev, { from: 'bot', text: reply }]);
+                }, 700);
+            };
 
             return (
-                <section className="border-y border-forest/10 bg-white/75 backdrop-blur-sm py-6">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <span className="text-[11px] font-bold uppercase tracking-widest text-muted shrink-0">
-                                CORE CAPABILITIES
-                            </span>
-                            <div className="flex flex-wrap items-center gap-6 sm:gap-8 text-xs font-semibold text-forest">
-                                {capabilities.map((c, i) => (
-                                    <div key={i} className="flex items-center gap-2 group hover:text-gold-dark transition-colors">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
-                                        <span>{c}</span>
+                <div className="card-3d bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-6 border border-forest/10 shadow-card space-y-4 relative">
+                    {/* Header with Live Status */}
+                    <div className="flex items-center justify-between pb-3 border-b border-forest/10">
+                        <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span className="text-xs font-bold text-forest uppercase tracking-wider font-mono">Live Interactive Demo</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-gold-dark font-bold bg-gold/10 px-2 py-0.5 rounded-full border border-gold/30">
+                            TEST IN REAL TIME
+                        </span>
+                    </div>
+
+                    {/* Interactive Switcher Tabs */}
+                    <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#F8F7F2] border border-forest/10 text-[11px] font-bold">
+                        <button
+                            onClick={() => setActiveTab('3d-villa')}
+                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === '3d-villa' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
+                        >
+                            <span>ðŸ¡ 3D Villa</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('ai-agent')}
+                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === 'ai-agent' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
+                        >
+                            <span>ðŸ¤– AI Agent</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('ad-engine')}
+                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === 'ad-engine' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
+                        >
+                            <span>ðŸ“ˆ Ad ROI</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('speed-web')}
+                            className={`py-2 px-1 rounded-xl transition-all text-center flex flex-col items-center gap-0.5 ${activeTab === 'speed-web' ? 'bg-forest text-white shadow-soft' : 'text-muted hover:text-forest'}`}
+                        >
+                            <span>âš¡ Web 99</span>
+                        </button>
+                    </div>
+
+                    {/* TAB 1: 3D Villa (PropSouq AI) */}
+                    {activeTab === '3d-villa' && (
+                        <div className="space-y-3">
+                            <div className="relative rounded-2xl overflow-hidden border border-forest/15">
+                                <ThreeJsArchitecturalViewer activeFloor={activeFloor} />
+                                <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 bg-forest/90 backdrop-blur-md p-1 rounded-xl border border-gold/30 text-[10px] font-mono text-white">
+                                    <button
+                                        onClick={() => setActiveFloor('all')}
+                                        className={`px-2 py-1 rounded-lg ${activeFloor === 'all' ? 'bg-gold text-forest font-bold' : 'hover:bg-white/10'}`}
+                                    >
+                                        Full
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveFloor('first')}
+                                        className={`px-2 py-1 rounded-lg ${activeFloor === 'first' ? 'bg-gold text-forest font-bold' : 'hover:bg-white/10'}`}
+                                    >
+                                        1st Fl
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveFloor('ground')}
+                                        className={`px-2 py-1 rounded-lg ${activeFloor === 'ground' ? 'bg-gold text-forest font-bold' : 'hover:bg-white/10'}`}
+                                    >
+                                        Ground
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-muted pt-1">
+                                <span className="flex items-center gap-1 text-forest font-semibold text-[11px]">
+                                    <Icon name="sparkles" className="w-3.5 h-3.5 text-gold" />
+                                    Touch or drag above to spin in 360Â°
+                                </span>
+                                <a
+                                    href="propsouq.html"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-bold text-gold-dark hover:underline flex items-center gap-1"
+                                >
+                                    <span>Full Demo</span>
+                                    <Icon name="external-link" className="w-3 h-3" />
+                                </a>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TAB 2: AI Smart Agent Simulator */}
+                    {activeTab === 'ai-agent' && (
+                        <div className="space-y-3">
+                            <div className="h-56 overflow-y-auto space-y-2 p-3 rounded-2xl bg-[#F8F7F2] border border-forest/10 text-xs font-sans">
+                                {chatMessages.map((m, idx) => (
+                                    <div key={idx} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] p-2.5 rounded-2xl ${m.from === 'user' ? 'bg-forest text-white rounded-tr-none' : 'bg-white text-dark border border-forest/10 rounded-tl-none shadow-soft'}`}>
+                                            {m.from === 'bot' && (
+                                                <div className="flex items-center gap-1 text-[10px] text-gold-dark font-bold font-mono pb-0.5">
+                                                    <span>ðŸ¤– Eagle AI Assistant</span>
+                                                    <span className="text-[9px] text-emerald-600">â€¢ 0.8s reply</span>
+                                                </div>
+                                            )}
+                                            <p className="leading-relaxed">{m.text}</p>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
+                            {/* Suggested Prompts */}
+                            <div className="flex flex-wrap gap-1.5 text-[10px]">
+                                <button
+                                    onClick={() => handleSendSimulatedMsg('How do you generate leads for real estate?')}
+                                    className="px-2.5 py-1 rounded-full bg-white border border-forest/10 hover:border-gold text-forest font-medium"
+                                >
+                                    ðŸ¡ Real Estate Leads?
+                                </button>
+                                <button
+                                    onClick={() => handleSendSimulatedMsg('Can this connect to my WhatsApp?')}
+                                    className="px-2.5 py-1 rounded-full bg-white border border-forest/10 hover:border-gold text-forest font-medium"
+                                >
+                                    ðŸ’¬ WhatsApp Setup?
+                                </button>
+                                <button
+                                    onClick={() => handleSendSimulatedMsg('What is your pricing model?')}
+                                    className="px-2.5 py-1 rounded-full bg-white border border-forest/10 hover:border-gold text-forest font-medium"
+                                >
+                                    ðŸ’° Pricing & ROI?
+                                </button>
+                            </div>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSendSimulatedMsg(); }}
+                                    placeholder="Type a message to test the AI..."
+                                    className="flex-1 px-3 py-2 text-xs rounded-xl border border-forest/20 focus:outline-none focus:border-forest"
+                                />
+                                <button
+                                    onClick={() => handleSendSimulatedMsg()}
+                                    className="px-3.5 py-2 rounded-xl bg-forest text-gold font-bold text-xs"
+                                >
+                                    Send
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </section>
-            );
-        }
+                    )}
 
-        // =========================================================================
-        // BUSINESS CHALLENGES WE SOLVE (Required on Homepage)
-        // =========================================================================
-        function BusinessChallengesSection({ onOpenConsultation }) {
-            const challenges = [
-                {
-                    icon: 'trending-down',
-                    title: 'Inconsistent Lead Generation',
-                    desc: 'Relying on word-of-mouth or uncoordinated marketing leads to unpredictable cash flow and volatile customer acquisition.',
-                    solution: 'We build dependable multi-channel digital acquisition systems that target active buyer demand continuously.'
-                },
-                {
-                    icon: 'clock',
-                    title: 'Manual & Repetitive Bottlenecks',
-                    desc: 'Valuable staff spend hours answering repetitive inquiries, scheduling appointments, and manually copying data between tools.',
-                    solution: 'We implement autonomous AI workflows and custom agents that handle lead qualification, triage, and data hygiene automatically.'
-                },
-                {
-                    icon: 'hourglass',
-                    title: 'Delayed Lead Response Velocity',
-                    desc: 'Inbound leads go cold when follow-ups take hours. Potential clients move to competitors before your team can respond.',
-                    solution: 'We deploy instant conversational touchpoints and automated follow-up sequences across web and messaging channels.'
-                },
-                {
-                    icon: 'layout',
-                    title: 'Websites That Don’t Convert',
-                    desc: 'Most business websites are static online brochures with low engagement, poor mobile usability, and no clear conversion path.',
-                    solution: 'We develop high-performance, conversion-focused websites with Web-as-a-Service continuous optimization.'
-                },
-                {
-                    icon: 'layers',
-                    title: 'Fragmented Tech & Disorganized Data',
-                    desc: 'Ad platforms, CRM systems, communication tools, and internal spreadsheets operate in silos with no central visibility.',
-                    solution: 'We integrate your growth stack into one connected architecture with accurate attribution and unified lead routing.'
-                }
-            ];
+                    {/* TAB 3: Performance Ad Engine */}
+                    {activeTab === 'ad-engine' && (
+                        <div className="space-y-4 p-2">
+                            <div className="space-y-1.5">
+                                <div className="flex justify-between text-xs font-bold text-forest">
+                                    <span>Monthly Ad Budget</span>
+                                    <span className="font-mono text-gold-dark">â‚¹{adSpend.toLocaleString('en-IN')} / mo</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="20000"
+                                    max="200000"
+                                    step="10000"
+                                    value={adSpend}
+                                    onChange={(e) => setAdSpend(Number(e.target.value))}
+                                    className="w-full accent-forest cursor-pointer"
+                                />
+                            </div>
 
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark">Operational Reality</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Business Challenges We Solve.
-                        </h2>
-                        <p className="text-base text-muted leading-relaxed">
-                            Growth slows down when customer acquisition is fragmented and internal operations remain manual. Here is how we remove those constraints.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-                        {challenges.map((c, i) => (
-                            <div key={i} className="bg-white/90 backdrop-blur-sm rounded-3xl p-7 border border-forest/10 shadow-soft flex flex-col justify-between hover:border-gold/40 transition-all">
-                                <div className="space-y-4">
-                                    <div className="w-10 h-10 rounded-xl bg-forest/5 flex items-center justify-center text-forest">
-                                        <Icon name={c.icon} className="w-5 h-5 text-forest" />
+                            <div className="grid grid-cols-2 gap-3 text-center">
+                                <div className="p-3 rounded-2xl bg-[#F8F7F2] border border-forest/10">
+                                    <div className="text-[10px] text-muted uppercase font-mono font-bold">Est. Qualified Leads</div>
+                                    <div className="text-2xl font-display font-extrabold text-forest mt-0.5">
+                                        {Math.round(adSpend / 650)} - {Math.round(adSpend / 450)}
                                     </div>
-                                    <h3 className="text-xl font-display font-bold text-forest">{c.title}</h3>
-                                    <div className="text-xs text-muted leading-relaxed">
-                                        <span className="font-semibold text-dark">The Challenge:</span> {c.desc}
+                                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">High-Intent Inquiries</div>
+                                </div>
+                                <div className="p-3 rounded-2xl bg-[#F8F7F2] border border-forest/10">
+                                    <div className="text-[10px] text-muted uppercase font-mono font-bold">Avg. Revenue Impact</div>
+                                    <div className="text-2xl font-display font-extrabold text-gold-dark mt-0.5">
+                                        â‚¹{(Math.round((adSpend * 3.8) / 1000) * 1000).toLocaleString('en-IN')}
                                     </div>
-                                    <div className="p-3.5 rounded-xl bg-[#F8F7F2] border border-forest/10 text-xs text-forest leading-relaxed">
-                                        <span className="font-bold text-gold-dark">Our Solution:</span> {c.solution}
-                                    </div>
+                                    <div className="text-[10px] text-muted font-medium mt-0.5">Based on 3.8x ROAS</div>
                                 </div>
                             </div>
-                        ))}
 
-                        {/* Callout Card */}
-                        <div className="bg-forest text-ivory rounded-3xl p-7 border border-gold/40 shadow-card flex flex-col justify-between">
-                            <div className="space-y-3">
-                                <div className="w-10 h-10 rounded-xl bg-forest-card text-gold flex items-center justify-center">
-                                    <Icon name="sparkles" className="w-5 h-5" />
+                            <button
+                                onClick={() => onOpenConsultation('Ad Campaign Proposal')}
+                                className="w-full py-2.5 rounded-xl bg-forest hover:bg-forest-deep text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-soft"
+                            >
+                                <span>Get Custom Ad Strategy For Your Budget â†’</span>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* TAB 4: High-Converting 3D Web */}
+                    {activeTab === 'speed-web' && (
+                        <div className="space-y-3 p-1">
+                            <div className="p-4 rounded-2xl bg-forest text-white space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
+                                        <span className="text-xs font-bold uppercase font-mono text-gold">Google Performance Score</span>
+                                    </div>
+                                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                                        Grade A+
+                                    </span>
                                 </div>
-                                <h3 className="text-xl font-display font-bold text-white">Ready to remove your operational bottlenecks?</h3>
-                                <p className="text-xs text-ivory-dark leading-relaxed">
-                                    Schedule a direct consultation with our digital strategists to review your current acquisition and automation infrastructure.
+                                <div className="flex items-center justify-around text-center py-2 border-y border-white/10">
+                                    <div>
+                                        <div className="text-2xl font-bold font-mono text-emerald-400">99</div>
+                                        <div className="text-[10px] text-ivory-dark">Performance</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold font-mono text-emerald-400">100</div>
+                                        <div className="text-[10px] text-ivory-dark">Accessibility</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold font-mono text-emerald-400">100</div>
+                                        <div className="text-[10px] text-ivory-dark">SEO Ready</div>
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-ivory-dark leading-relaxed">
+                                    Our websites load under 0.8 seconds and are optimized to capture leads directly to your WhatsApp and CRM.
                                 </p>
                             </div>
-                            <div className="pt-6">
-                                <button
-                                    onClick={() => onOpenConsultation('Business Challenge Diagnostic')}
-                                    className="w-full py-3.5 rounded-xl bg-gold text-forest font-bold text-xs hover:bg-gold-light transition-all flex items-center justify-center gap-2"
-                                >
-                                    <span>Schedule a Diagnostic Session</span>
-                                    <Icon name="arrow-up-right" className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => onNavigate('web-development')}
+                                className="w-full py-2.5 rounded-xl bg-white border border-forest text-forest hover:bg-forest hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                            >
+                                <span>See Web-as-a-Service Plans â†’</span>
+                            </button>
                         </div>
+                    )}
+
+                    {/* Interactive Hub Footer */}
+                    <div className="pt-2 border-t border-forest/10 flex items-center justify-between text-[11px] text-muted">
+                        <span>Ready to scale your business?</span>
+                        <button
+                            onClick={() => onOpenConsultation('Interactive Hub Consultation')}
+                            className="text-forest font-bold hover:text-gold-dark hover:underline flex items-center gap-1"
+                        >
+                            <span>Book Consultation</span>
+                            <Icon name="arrow-right" className="w-3 h-3" />
+                        </button>
                     </div>
-                </section>
+                </div>
             );
         }
 
         // =========================================================================
-        // OUR CORE SERVICES (4 Primary Pillars with Full Detail & Clean Routing)
+        // POSITIONING BENEFIT STRIP
         // =========================================================================
-        function CoreServicesSection({ onNavigate, onOpenConsultation }) {
+        function PositioningStrip() {
+            const benefits = [
+                "ðŸŽ¯ High-Intent Inquiries Only",
+                "âš¡ 24/7 AI Lead Qualification",
+                "ðŸ¡ 3D Virtual Real Estate Showrooms",
+                "ðŸ“ˆ 3.8x Average Return on Ad Spend",
+                "ðŸ’¬ Instant WhatsApp & CRM Sync",
+                "ðŸš€ Launch in 7 to 14 Days",
+                "ðŸ”’ Zero Long-Term Lock-in Contracts"
+            ];
+
             return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-                    <div className="max-w-3xl space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark">Connected Growth Services</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Our Core Services.
-                        </h2>
-                        <p className="text-base text-muted leading-relaxed">
-                            We combine customer acquisition, intelligent automation, and modern web platforms into one aligned commercial system.
-                        </p>
+                <div className="w-full bg-forest text-ivory py-4 border-y border-gold/30 overflow-hidden relative shadow-luxury">
+                    <div className="flex whitespace-nowrap animate-marquee gap-8 items-center text-xs sm:text-sm font-semibold tracking-wide">
+                        {[...benefits, ...benefits].map((b, i) => (
+                            <div key={i} className="flex items-center gap-3 shrink-0">
+                                <span className="text-gold font-bold">{b}</span>
+                                <span className="text-gold/40">â€¢</span>
+                            </div>
+                        ))}
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-                        
-                        {/* 1. Digital Marketing */}
-                        <div className="bg-white/95 rounded-3xl p-6 sm:p-7 border border-forest/10 shadow-soft flex flex-col justify-between hover:border-forest/40 hover:shadow-card transition-all group">
-                            <div className="space-y-4">
-                                {/* Visual Image Banner */}
-                                <div className="relative h-40 rounded-2xl overflow-hidden border border-forest/10">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80" 
-                                        alt="Digital Marketing & Organic Growth" 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/90 via-forest/30 to-transparent"></div>
-                                    <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-xl bg-forest/90 backdrop-blur-md text-gold flex items-center justify-center border border-gold/30">
-                                            <Icon name="globe" className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[11px] font-mono font-bold text-white tracking-wide uppercase">Organic Growth</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-xl font-display font-bold text-forest">Digital Marketing</h3>
-                                    <p className="text-xs text-muted mt-1 leading-relaxed">
-                                        Establish and expand your digital market presence across organic search, social channels, and answer engines.
-                                    </p>
-                                </div>
-                                <ul className="space-y-2 text-xs text-dark border-t border-forest/10 pt-4">
-                                    {['Digital Marketing Strategy', 'Content Strategy & Planning', 'Search Engine Optimization (SEO)', 'Answer Engine Optimization (AEO/GEO)', 'Social Media Management', 'Traffic & Conversion Optimization'].map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-2">
-                                            <Icon name="check" className="w-3.5 h-3.5 text-gold shrink-0" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="pt-6 border-t border-forest/10 flex items-center justify-between">
-                                <button
-                                    onClick={() => onNavigate('digital-marketing')}
-                                    className="text-xs font-bold text-forest hover:text-gold-dark flex items-center gap-1 transition-colors"
-                                >
-                                    <span>Explore Service Details</span>
-                                    <Icon name="arrow-right" className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* 2. Performance Marketing */}
-                        <div className="bg-white/95 rounded-3xl p-6 sm:p-7 border border-forest/10 shadow-soft flex flex-col justify-between hover:border-forest/40 hover:shadow-card transition-all group">
-                            <div className="space-y-4">
-                                {/* Visual Image Banner */}
-                                <div className="relative h-40 rounded-2xl overflow-hidden border border-forest/10">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80" 
-                                        alt="Performance Marketing & Paid Funnels" 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/90 via-forest/30 to-transparent"></div>
-                                    <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-xl bg-forest/90 backdrop-blur-md text-gold flex items-center justify-center border border-gold/30">
-                                            <Icon name="target" className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[11px] font-mono font-bold text-white tracking-wide uppercase">Paid Acquisition</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-xl font-display font-bold text-forest">Performance Marketing</h3>
-                                    <p className="text-xs text-muted mt-1 leading-relaxed">
-                                        Data-driven paid advertising across Google, Meta, and LinkedIn engineered for qualified lead generation.
-                                    </p>
-                                </div>
-                                <ul className="space-y-2 text-xs text-dark border-t border-forest/10 pt-4">
-                                    {['Google Search & PMax Ads', 'Meta Ads (Facebook & Instagram)', 'LinkedIn B2B Advertising', 'Audience Research & Targeting', 'Landing Page Optimization', 'Conversion Tracking Architecture'].map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-2">
-                                            <Icon name="check" className="w-3.5 h-3.5 text-gold shrink-0" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="pt-6 border-t border-forest/10 flex items-center justify-between">
-                                <button
-                                    onClick={() => onNavigate('performance-marketing')}
-                                    className="text-xs font-bold text-forest hover:text-gold-dark flex items-center gap-1 transition-colors"
-                                >
-                                    <span>Explore Service Details</span>
-                                    <Icon name="arrow-right" className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* 3. AI Automation & Agents */}
-                        <div className="bg-white/95 rounded-3xl p-6 sm:p-7 border border-forest/10 shadow-soft flex flex-col justify-between hover:border-forest/40 hover:shadow-card transition-all group">
-                            <div className="space-y-4">
-                                {/* Visual Image Banner */}
-                                <div className="relative h-40 rounded-2xl overflow-hidden border border-forest/10">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" 
-                                        alt="AI Automation & Custom Agents" 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/90 via-forest/30 to-transparent"></div>
-                                    <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-xl bg-forest/90 backdrop-blur-md text-gold flex items-center justify-center border border-gold/30">
-                                            <Icon name="bot" className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[11px] font-mono font-bold text-white tracking-wide uppercase">Autonomous AI</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-xl font-display font-bold text-forest">AI Automation & Agents</h3>
-                                    <p className="text-xs text-muted mt-1 leading-relaxed">
-                                        Practical business automation that qualifies prospects, routes enquiries, and removes manual friction.
-                                    </p>
-                                </div>
-                                <ul className="space-y-2 text-xs text-dark border-t border-forest/10 pt-4">
-                                    {['AI Customer Support Assistants', 'Lead Capture & Qualification', 'WhatsApp Business Automation', 'Appointment Booking Workflows', 'Internal Knowledge Assistants', 'CRM & Workflow Integrations'].map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-2">
-                                            <Icon name="check" className="w-3.5 h-3.5 text-gold shrink-0" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="pt-6 border-t border-forest/10 flex items-center justify-between">
-                                <button
-                                    onClick={() => onNavigate('ai-automation')}
-                                    className="text-xs font-bold text-forest hover:text-gold-dark flex items-center gap-1 transition-colors"
-                                >
-                                    <span>Explore Service Details</span>
-                                    <Icon name="arrow-right" className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* 4. Website Development & WaaS */}
-                        <div className="bg-white/95 rounded-3xl p-6 sm:p-7 border border-gold/40 shadow-card flex flex-col justify-between hover:border-gold transition-all group">
-                            <div className="space-y-4">
-                                {/* Visual Image Banner */}
-                                <div className="relative h-40 rounded-2xl overflow-hidden border border-forest/10">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80" 
-                                        alt="Website Development & Managed WaaS" 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/90 via-forest/30 to-transparent"></div>
-                                    <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-xl bg-forest/90 backdrop-blur-md text-gold flex items-center justify-center border border-gold/30">
-                                            <Icon name="code" className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[11px] font-mono font-bold text-white tracking-wide uppercase">Modern Platforms</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-xl font-display font-bold text-forest">Website Development & WaaS</h3>
-                                    <p className="text-xs text-muted mt-1 leading-relaxed">
-                                        Conversion-focused business websites and continuously managed Web-as-a-Service platforms.
-                                    </p>
-                                </div>
-                                <ul className="space-y-2 text-xs text-dark border-t border-forest/10 pt-4">
-                                    {['High-Performance Business Websites', 'Lead Generation Landing Pages', 'Web-as-a-Service (WaaS) Model', 'Continuous Optimization & Updates', 'Forms & API Integrations', 'Real Estate Web Experiences'].map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-2">
-                                            <Icon name="check" className="w-3.5 h-3.5 text-forest shrink-0" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="pt-6 border-t border-forest/10 flex items-center justify-between">
-                                <button
-                                    onClick={() => onNavigate('web-development')}
-                                    className="text-xs font-bold text-forest hover:text-gold-dark flex items-center gap-1 transition-colors"
-                                >
-                                    <span>Explore Service Details</span>
-                                    <Icon name="arrow-right" className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
+                </div>
             );
         }
 
         // =========================================================================
-        // HOW WE WORK (5-Step Execution Blueprint)
+        // WHAT WE OFFER (The 4 Clear Pillars - Simple, Attractive, Non-Technical)
         // =========================================================================
-        function HowWeWorkSection() {
-            const steps = [
+        function WhatWeOfferSection({ onNavigate, onOpenConsultation }) {
+            const pillars = [
                 {
-                    num: '01',
-                    title: 'UNDERSTAND',
-                    subtitle: 'Diagnosis & Alignment',
-                    desc: 'We analyze your business model, customer journey, current acquisition channels, and operational bottlenecks.'
+                    id: 'performance-marketing',
+                    tag: 'ACQUISITION',
+                    title: 'Targeted Customer Ads',
+                    headline: 'Turn ad spend into paying clients.',
+                    desc: 'Stop wasting money on generic boost posts. We build high-performing Google & Meta ad funnels that put your offer directly in front of buyers ready to buy today.',
+                    benefits: [
+                        'Google Search Ads (Intent-driven buyers)',
+                        'Meta & Instagram Creative Campaigns',
+                        'High-converting landing page funnels',
+                        'Clear weekly ROI & cost-per-lead tracking'
+                    ],
+                    icon: 'target',
+                    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+                    actionLabel: 'Explore Ad Strategy'
                 },
                 {
-                    num: '02',
-                    title: 'BUILD',
-                    subtitle: 'Architecture & Engineering',
-                    desc: 'We engineer the digital marketing funnel, configure tracking architecture, and build the required AI workflows or web platforms.'
+                    id: 'web-development',
+                    tag: 'CONVERSION',
+                    title: 'Websites That Actually Sell',
+                    headline: 'Fast, modern, built to convert.',
+                    desc: 'Your website is your best salesperson. We design stunning, lightning-fast 3D websites tailored to build instant credibility and turn casual visitors into booked calls.',
+                    benefits: [
+                        'Sub-second loading speed on smartphones',
+                        'Interactive 3D visuals & conversion psychology',
+                        'Direct WhatsApp & booking calendar integration',
+                        'Continuous updates & hosting included (WaaS)'
+                    ],
+                    icon: 'layout',
+                    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+                    actionLabel: 'View Web Plans'
                 },
                 {
-                    num: '03',
-                    title: 'LAUNCH',
-                    subtitle: 'Controlled Deployment',
-                    desc: 'We launch campaigns, deploy automated assistants, and activate the digital platform with end-to-end data validation.'
+                    id: 'ai-automation',
+                    tag: 'AUTOMATION',
+                    title: '24/7 AI Smart Assistants',
+                    headline: 'Never lose a lead to slow replies.',
+                    desc: 'When potential clients reach out, they want answers now. Our AI assistants answer inquiries in 10 seconds, qualify buyer budgets, and book meetings into your calendar 24/7.',
+                    benefits: [
+                        'Instant WhatsApp & website chat response',
+                        'Automated lead qualification & scheduling',
+                        'Direct sync with HubSpot, Zoho, or Google Sheets',
+                        'Saves 100+ hours of repetitive manual data entry'
+                    ],
+                    icon: 'bot',
+                    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+                    actionLabel: 'Explore AI Agents'
                 },
                 {
-                    num: '04',
-                    title: 'MEASURE & OPTIMIZE',
-                    subtitle: 'Data-Backed Iteration',
-                    desc: 'We monitor lead quality, pipeline flow, and operational efficiency, making structured adjustments based on empirical data.'
-                },
-                {
-                    num: '05',
-                    title: 'SCALE',
-                    subtitle: 'Predictable Expansion',
-                    desc: 'We expand working campaigns, refine automation logic, and scale customer acquisition reliably.'
+                    id: 'propsouq-ai',
+                    tag: 'FLAGSHIP PRODUCT',
+                    title: 'PropSouq AI Real Estate Tech',
+                    headline: 'Interactive 3D property sales platform.',
+                    desc: 'Donâ€™t just send boring PDF brochures. PropSouq AI gives builders and brokers an interactive 3D virtual sales experience where buyers explore villas, check floor plans, and book site visits.',
+                    benefits: [
+                        'Interactive 3D villa & architectural models',
+                        'Interactive EMI & mortgage calculators',
+                        'Branded digital client property portals',
+                        'Proven 3x higher site visit conversion'
+                    ],
+                    icon: 'home',
+                    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
+                    actionLabel: 'Explore PropSouq AI'
                 }
             ];
 
             return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark">Execution Blueprint</span>
+                <section id="what-we-offer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                    <div className="max-w-3xl space-y-3">
+                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">WHAT WE OFFER</span>
                         <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            How We Work.
+                            The 4 Pillars of Your Digital Growth.
                         </h2>
-                        <p className="text-base text-muted">
-                            A structured, five-stage process focused on clarity, technical rigor, and commercial outcomes.
+                        <p className="text-base sm:text-lg text-muted leading-relaxed">
+                            Everything you need to acquire customers online, automate your sales process, and eliminate operational bottlenecks.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                        {steps.map((st, idx) => (
-                            <div key={idx} className="bg-white/90 backdrop-blur-sm p-6 rounded-3xl border border-forest/10 shadow-soft space-y-3 hover:border-gold/50 transition-colors">
-                                <div className="text-2xl font-display font-extrabold text-gold-dark font-mono">{st.num}</div>
-                                <h4 className="text-base font-display font-bold text-forest">{st.title}</h4>
-                                <div className="text-[11px] font-semibold text-gold-dark uppercase tracking-wider">{st.subtitle}</div>
-                                <p className="text-xs text-muted leading-relaxed">{st.desc}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {pillars.map((p, idx) => (
+                            <div 
+                                key={idx}
+                                className="card-3d bg-white/95 rounded-3xl p-6 sm:p-8 border border-forest/10 shadow-soft hover:shadow-card hover:border-gold/40 transition-all flex flex-col justify-between group"
+                            >
+                                <div className="space-y-5">
+                                    {/* Visual Banner */}
+                                    <div className="relative h-44 rounded-2xl overflow-hidden border border-forest/10">
+                                        <img 
+                                            src={p.image} 
+                                            alt={p.title} 
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            loading="lazy"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/90 via-forest/30 to-transparent"></div>
+                                        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white">
+                                            <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-forest/80 border border-gold/30 text-gold uppercase font-bold">
+                                                {p.tag}
+                                            </span>
+                                            <div className="w-8 h-8 rounded-xl bg-forest/90 text-gold flex items-center justify-center border border-gold/20">
+                                                <Icon name={p.icon} className="w-4 h-4" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-2xl font-display font-bold text-forest">{p.title}</h3>
+                                        <div className="text-xs font-semibold text-gold-dark mt-0.5">{p.headline}</div>
+                                        <p className="text-xs sm:text-sm text-muted mt-2 leading-relaxed">{p.desc}</p>
+                                    </div>
+
+                                    <ul className="space-y-2.5 text-xs text-dark border-t border-forest/10 pt-4 font-medium">
+                                        {p.benefits.map((b, bIdx) => (
+                                            <li key={bIdx} className="flex items-center gap-2">
+                                                <span className="w-4 h-4 rounded-full bg-forest/5 text-forest flex items-center justify-center shrink-0">
+                                                    <Icon name="check" className="w-2.5 h-2.5 text-emerald-600 font-bold" />
+                                                </span>
+                                                <span>{b}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="pt-6 border-t border-forest/10 flex items-center justify-between mt-4">
+                                    <button
+                                        onClick={() => onNavigate(p.id)}
+                                        className="text-xs font-bold text-forest hover:text-gold-dark flex items-center gap-1.5 transition-colors"
+                                    >
+                                        <span>{p.actionLabel}</span>
+                                        <Icon name="arrow-right" className="w-3.5 h-3.5" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => onOpenConsultation(`Consultation: ${p.title}`)}
+                                        className="px-4 py-2 rounded-xl bg-forest/5 hover:bg-forest hover:text-white text-forest text-xs font-bold transition-all"
+                                    >
+                                        Get Started
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -1862,286 +1878,372 @@
         }
 
         // =========================================================================
-        // PROPSOUQ AI HOME SHOWCASE (Clearly distinguishing Agency from Software Product)
+        // REAL RESULTS SECTION (Client Outcomes with Tangible Proof)
         // =========================================================================
-        function PropSouqHomeShowcaseSection({ onNavigate, onOpenConsultation }) {
+        function ResultsAndOutcomesSection({ onOpenConsultation }) {
+            const results = [
+                {
+                    metric: '140+ Site Visits',
+                    timeframe: 'in 30 Days',
+                    industry: 'Real Estate Developer',
+                    title: 'Dharti Prangan Luxury Villas',
+                    problem: 'Static brochure downloads were generating low-intent leads with only a 4% follow-up show rate.',
+                    solution: 'Implemented PropSouq AI interactive 3D virtual tour + instant WhatsApp automated qualification.',
+                    outcome: 'Over 140 pre-qualified site visits booked with 35% higher closing rate.'
+                },
+                {
+                    metric: '320+ Patients',
+                    timeframe: 'Automated Bookings',
+                    industry: 'Healthcare Clinic',
+                    title: 'Multi-Specialty Healthcare',
+                    problem: 'Front desk missed 40% of inquiries coming in after 6 PM and during peak clinic hours.',
+                    solution: 'Deployed a 24/7 AI appointment assistant handling patient FAQs and doctor slot scheduling.',
+                    outcome: '320+ appointments scheduled after-hours with 0 additional administrative staff.'
+                },
+                {
+                    metric: '3.9x Ad Return',
+                    timeframe: 'Sustained ROAS',
+                    industry: 'B2B Professional Services',
+                    title: 'Corporate Advisory Firm',
+                    problem: 'High cost per lead and unqualified inquiries draining valuable consulting hours.',
+                    solution: 'Engineered high-intent Google Search campaigns paired with an automated multi-step qualification funnel.',
+                    outcome: 'Cost per qualified meeting dropped by 48% while maintaining a 3.9x ROI on ad spend.'
+                }
+            ];
+
             return (
                 <section className="bg-forest text-ivory py-20 border-y border-forest-border tech-grid-pattern-dark relative overflow-hidden">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
-                        
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
+                            <div className="max-w-2xl space-y-2">
+                                <span className="text-xs font-mono font-bold text-gold uppercase tracking-widest">PROVEN TRACK RECORD</span>
+                                <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight">
+                                    Real Results for Growing Businesses.
+                                </h2>
+                                <p className="text-sm sm:text-base text-ivory-dark">
+                                    We measure our work by actual revenue pipeline, closed deals, and hours saved â€” not vanity metrics.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => onOpenConsultation('Case Results Review')}
+                                className="px-6 py-3.5 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-xs shadow-luxury transition-all shrink-0"
+                            >
+                                Schedule Your Growth Audit â†’
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {results.map((r, i) => (
+                                <div key={i} className="bg-forest-deep rounded-3xl p-7 border border-white/10 shadow-2xl flex flex-col justify-between space-y-5 hover:border-gold/40 transition-colors">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className="font-mono text-[10px] text-gold font-bold px-2 py-0.5 rounded bg-gold/10 border border-gold/30 uppercase">
+                                                {r.industry}
+                                            </span>
+                                            <span className="text-[10px] font-mono text-ivory-dark">{r.timeframe}</span>
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <div className="text-3xl font-display font-extrabold text-white">{r.metric}</div>
+                                            <div className="text-sm font-bold text-gold">{r.title}</div>
+                                        </div>
+
+                                        <div className="text-xs text-ivory-dark space-y-2 pt-2 border-t border-white/10">
+                                            <div>
+                                                <span className="font-bold text-white">Challenge:</span> {r.problem}
+                                            </div>
+                                            <div>
+                                                <span className="font-bold text-gold">Our System:</span> {r.solution}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-3.5 rounded-xl bg-forest/80 border border-emerald-500/30 text-xs font-medium text-emerald-300">
+                                        âœ“ <span className="font-bold text-white">Impact:</span> {r.outcome}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // =========================================================================
+        // HOW WE HELP YOUR BUSINESS (The 3-Step Growth Sprint)
+        // =========================================================================
+        function HowWeHelpSection({ onOpenConsultation }) {
+            const steps = [
+                {
+                    num: '01',
+                    title: 'Free Strategy Call & Audit',
+                    tag: 'DAY 1',
+                    desc: 'We review your current website, ad campaigns, and sales workflow to identify exactly where you are losing potential clients and revenue.',
+                    outcome: 'You receive a clear, actionable Growth Blueprint with zero sales pressure.'
+                },
+                {
+                    num: '02',
+                    title: 'Rapid Build & Launch',
+                    tag: 'DAYS 2 â€“ 10',
+                    desc: 'We design your conversion-ready 3D website, launch targeted Google/Meta ad funnels, or set up your 24/7 AI customer assistant.',
+                    outcome: 'Your new growth engine goes live with tracking and CRM integration in days, not months.'
+                },
+                {
+                    num: '03',
+                    title: 'Hands-Off Scaling & Optimization',
+                    tag: 'ONGOING',
+                    desc: 'We monitor ad spend, test creative messaging, and optimize your conversion rates weekly so your customer pipeline grows consistently.',
+                    outcome: 'Predictable high-intent leads and sales without you having to manage marketing yourself.'
+                }
+            ];
+
+            return (
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                    <div className="max-w-3xl space-y-3">
+                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">HOW WE HELP YOU</span>
+                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
+                            A Simple, 3-Step Growth Sprint.
+                        </h2>
+                        <p className="text-base sm:text-lg text-muted">
+                            No endless meetings, no technical headaches. Just clear deliverables and commercial results.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {steps.map((st, i) => (
+                            <div key={i} className="card-3d bg-white/95 rounded-3xl p-7 sm:p-8 border border-forest/10 shadow-soft flex flex-col justify-between space-y-6 hover:border-gold/40 transition-all">
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-3xl font-display font-extrabold text-gold-dark font-mono">{st.num}</div>
+                                        <span className="text-[10px] font-mono font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full">
+                                            {st.tag}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-xl font-display font-bold text-forest">{st.title}</h3>
+                                    <p className="text-xs sm:text-sm text-muted leading-relaxed">{st.desc}</p>
+                                </div>
+                                <div className="p-3.5 rounded-2xl bg-[#F8F7F2] border border-forest/10 text-xs text-forest">
+                                    <span className="font-bold text-gold-dark">Outcome:</span> {st.outcome}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="text-center pt-2">
+                        <button
+                            onClick={() => onOpenConsultation('Growth Sprint Consultation')}
+                            className="px-8 py-4 rounded-xl bg-forest text-white font-bold text-sm hover:bg-forest-deep shadow-soft transition-all inline-flex items-center gap-2 btn-luxury-shimmer"
+                        >
+                            <span>Start Your 3-Step Growth Sprint Today</span>
+                            <Icon name="arrow-right" className="w-4 h-4 text-gold" />
+                        </button>
+                    </div>
+                </section>
+            );
+        }
+
+        // =========================================================================
+        // PROPSOUQ AI HOME SHOWCASE (Flagship 3D Real Estate Technology Product)
+        // =========================================================================
+        function PropSouqHomeShowcaseSection({ onNavigate, onOpenConsultation }) {
+            const [viewerFloor, setViewerFloor] = useState('all');
+
+            return (
+                <section className="bg-forest text-ivory py-20 border-y border-forest-border tech-grid-pattern-dark relative overflow-hidden">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
                         {/* Section Header */}
                         <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-8 pb-8 border-b border-white/10">
                             <div className="max-w-2xl space-y-3">
                                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-forest-deep text-gold border border-gold/30 text-xs font-bold uppercase tracking-widest font-mono">
                                     <span className="w-2 h-2 rounded-full bg-gold pulse-badge"></span>
-                                    <span>FLAGSHIP PRODUCT • DEVELOPED BY EAGLE STACK MEDIA</span>
+                                    <span>OUR FLAGSHIP PRODUCT â€¢ DEVELOPED BY EAGLE STACK</span>
                                 </div>
                                 <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight leading-tight">
-                                    Don’t Just List Properties. <br />
+                                    Donâ€™t Just List Properties. <br />
                                     <span className="gold-dark-text">Sell Them Interactively.</span>
                                 </h2>
                                 <p className="text-base text-ivory-dark leading-relaxed pt-1">
-                                    PropSouq AI is our specialized real estate technology product. While Eagle Stack Media provides digital growth services, PropSouq AI gives agents, brokers, builders, and developers their own branded digital property sales platform.
+                                    <span className="text-gold font-bold">PropSouq AI</span> is our dedicated real estate sales software. It gives builders, developers, and brokers their own branded 3D interactive property portal where buyers explore floor plans, calculate EMIs, and book verified site visits.
                                 </p>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-4 shrink-0">
-                                <button
-                                    onClick={() => onNavigate('propsouq-ai')}
-                                    className="px-7 py-4 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-sm shadow-luxury transition-all flex items-center gap-2 btn-luxury-shimmer"
-                                >
-                                    <span>Explore PropSouq AI Platform →</span>
-                                </button>
                                 <a
                                     href="propsouq.html"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-6 py-4 rounded-xl bg-forest-card border border-white/10 hover:border-gold text-white font-semibold text-sm transition-all flex items-center gap-2"
+                                    className="px-7 py-4 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-sm shadow-luxury transition-all flex items-center gap-2 btn-luxury-shimmer"
                                 >
-                                    <Icon name="external-link" className="w-4 h-4 text-gold" />
-                                    <span>Launch Interactive Demo</span>
+                                    <span>Launch Interactive 3D Demo</span>
+                                    <Icon name="external-link" className="w-4 h-4 text-forest" />
                                 </a>
+                                <button
+                                    onClick={() => onNavigate('propsouq-ai')}
+                                    className="px-6 py-4 rounded-xl bg-forest-card border border-white/10 hover:border-gold text-white font-semibold text-sm transition-all"
+                                >
+                                    Learn About the Platform â†’
+                                </button>
                             </div>
                         </div>
 
-                        {/* Concept Explanation: Agency vs Software */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                            <div className="p-4 rounded-2xl bg-forest-deep border border-white/5 space-y-1.5">
-                                <div className="font-bold text-gold uppercase tracking-wider font-mono text-[11px]">1. Branded Client Portals</div>
-                                <p className="text-ivory-dark leading-relaxed">Each real estate business gets its own dedicated, branded property website or portal.</p>
-                            </div>
-                            <div className="p-4 rounded-2xl bg-forest-deep border border-white/5 space-y-1.5">
-                                <div className="font-bold text-gold uppercase tracking-wider font-mono text-[11px]">2. Independent Portfolio Control</div>
-                                <p className="text-ivory-dark leading-relaxed">Agents and builders upload, manage, and showcase their own verified inventory directly.</p>
-                            </div>
-                            <div className="p-4 rounded-2xl bg-forest-deep border border-white/5 space-y-1.5">
-                                <div className="font-bold text-gold uppercase tracking-wider font-mono text-[11px]">3. From Discovery to Site Visits</div>
-                                <p className="text-ivory-dark leading-relaxed">Interactive 3D models, EMI simulators, and buyer fit tools guide prospects toward booking site visits.</p>
-                            </div>
-                        </div>
-
-                        {/* Interactive UI Showcase: Laptop + Mobile Preview */}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                            <div className="lg:col-span-8 bg-forest-deep rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
-                                <div className="flex items-center justify-between pb-4 border-b border-white/10 text-xs">
-                                    <div className="flex items-center gap-2 font-mono text-muted">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-red-400/80"></span>
-                                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80"></span>
-                                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80"></span>
-                                        <span className="text-white ml-2">PropSouq AI • Sample Client Property Page</span>
+                        {/* Interactive 3D Villa Experience */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                            <div className="lg:col-span-7 space-y-4">
+                                <div className="flex items-center justify-between text-xs text-ivory-dark">
+                                    <div className="flex items-center gap-2 font-mono">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        <span className="text-white font-bold">Live 3D Villa Prototype â€¢ Drag to Rotate</span>
                                     </div>
-                                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gold/20 text-gold border border-gold/30">
-                                        DEMO DATA
-                                    </span>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                                    <div className="md:col-span-5 rounded-2xl overflow-hidden h-52 bg-forest border border-white/10">
-                                        <img 
-                                            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" 
-                                            alt="Dharti Prangan 3 BHK Villa" 
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-7 space-y-2 text-xs">
-                                        <div className="text-[10px] uppercase font-bold text-gold">Demonstration Property</div>
-                                        <div className="text-xl font-display font-bold text-white">Dharti Prangan (AVADH DREAM ESTATE)</div>
-                                        <div className="text-muted">High Court Enclave, Jodhpur • Ready to Move</div>
-                                        <div className="pt-2 grid grid-cols-3 gap-2 text-[11px] font-mono">
-                                            <div className="p-2 rounded-lg bg-forest border border-white/5">
-                                                <div className="text-muted text-[10px]">Config</div>
-                                                <div className="text-white font-bold">3 BHK Duplex</div>
-                                            </div>
-                                            <div className="p-2 rounded-lg bg-forest border border-white/5">
-                                                <div className="text-muted text-[10px]">EMI Tool</div>
-                                                <div className="text-gold font-bold">Interactive</div>
-                                            </div>
-                                            <div className="p-2 rounded-lg bg-forest border border-white/5">
-                                                <div className="text-muted text-[10px]">Fit Score</div>
-                                                <div className="text-emerald-400 font-bold">91% Match</div>
-                                            </div>
-                                        </div>
+                                    <div className="flex gap-1.5">
+                                        <button
+                                            onClick={() => setViewerFloor('all')}
+                                            className={`px-3 py-1 rounded-lg text-[10px] font-mono ${viewerFloor === 'all' ? 'bg-gold text-forest font-bold' : 'bg-forest-deep text-white/70'}`}
+                                        >
+                                            Full Villa
+                                        </button>
+                                        <button
+                                            onClick={() => setViewerFloor('first')}
+                                            className={`px-3 py-1 rounded-lg text-[10px] font-mono ${viewerFloor === 'first' ? 'bg-gold text-forest font-bold' : 'bg-forest-deep text-white/70'}`}
+                                        >
+                                            1st Floor
+                                        </button>
+                                        <button
+                                            onClick={() => setViewerFloor('ground')}
+                                            className={`px-3 py-1 rounded-lg text-[10px] font-mono ${viewerFloor === 'ground' ? 'bg-gold text-forest font-bold' : 'bg-forest-deep text-white/70'}`}
+                                        >
+                                            Ground Floor
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-                                    <span className="text-muted">Interactive floor plans • Price range intelligence • 24/7 AI property assistant</span>
-                                    <button 
-                                        onClick={() => onNavigate('propsouq-ai')}
-                                        className="text-gold font-bold hover:underline flex items-center gap-1"
-                                    >
-                                        Explore Complete Feature Suite <Icon name="arrow-right" className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
+                                <ThreeJsArchitecturalViewer activeFloor={viewerFloor} />
                             </div>
 
-                            {/* Mobile Sheet Preview */}
-                            <div className="lg:col-span-4 bg-forest-deep rounded-3xl p-6 border border-gold/30 shadow-2xl flex flex-col justify-between">
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between text-xs text-muted pb-3 border-b border-white/10">
-                                        <span className="text-white font-bold flex items-center gap-1.5">
-                                            <Icon name="smartphone" className="w-4 h-4 text-gold" /> Mobile Buyer Journey
-                                        </span>
-                                        <span className="text-[10px] font-mono text-emerald-400">1-TAP ACTIONS</span>
-                                    </div>
-
-                                    <div className="rounded-2xl overflow-hidden h-36 border border-white/10 relative">
-                                        <img 
-                                            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80" 
-                                            alt="Mobile Property Showcase" 
-                                            className="w-full h-full object-cover" 
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-forest-deep via-transparent to-transparent"></div>
-                                        <div className="absolute bottom-2 left-3 text-xs font-bold text-white">Dharti Prangan Mobile View</div>
-                                    </div>
-
-                                    <div className="p-3 rounded-xl bg-forest border border-white/5 text-[11px] text-ivory-dark space-y-1">
-                                        <div className="font-bold text-gold flex items-center gap-1">
-                                            <Icon name="bot" className="w-3.5 h-3.5" /> AI Property Assistant
-                                        </div>
-                                        <p>“Namaste! I can assist you with verified room dimensions, EMI calculations, or booking an in-person site visit.”</p>
-                                    </div>
+                            {/* Value Proposition Points */}
+                            <div className="lg:col-span-5 space-y-4">
+                                <div className="p-5 rounded-2xl bg-forest-deep border border-white/10 space-y-2">
+                                    <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">01. 3D Virtual Showrooms</div>
+                                    <h4 className="text-lg font-display font-bold text-white">Give Buyers a Realistic Walkthrough</h4>
+                                    <p className="text-xs text-ivory-dark leading-relaxed">
+                                        Buyers can explore 3D villa models, inspect room dimensions, and check floor plans from anywhere in the world on their smartphone.
+                                    </p>
                                 </div>
 
-                                <div className="pt-4 mt-4 border-t border-white/10">
-                                    <a
-                                        href="propsouq.html"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full py-3 rounded-xl bg-gold text-forest font-bold text-xs flex items-center justify-center gap-2"
-                                    >
-                                        <Icon name="calendar-check" className="w-3.5 h-3.5" />
-                                        <span>Test Working Platform Demo</span>
-                                    </a>
+                                <div className="p-5 rounded-2xl bg-forest-deep border border-white/10 space-y-2">
+                                    <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">02. Instant EMI & Budget Calculator</div>
+                                    <h4 className="text-lg font-display font-bold text-white">Pre-Qualify Buyer Finances</h4>
+                                    <p className="text-xs text-ivory-dark leading-relaxed">
+                                        Interactive loan simulators calculate monthly payments in real-time, ensuring only serious, financially qualified buyers schedule site visits.
+                                    </p>
                                 </div>
+
+                                <div className="p-5 rounded-2xl bg-forest-deep border border-white/10 space-y-2">
+                                    <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">03. 100% Branded to Your Firm</div>
+                                    <h4 className="text-lg font-display font-bold text-white">Your Logo, Your Domain, Your Leads</h4>
+                                    <p className="text-xs text-ivory-dark leading-relaxed">
+                                        Unlike third-party portals where your leads are shared with competitors, PropSouq AI gives you an exclusive portal where 100% of inquiries belong to you.
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => onOpenConsultation('PropSouq AI Builder Demo')}
+                                    className="w-full py-3.5 rounded-xl bg-gold text-forest font-bold text-xs hover:bg-gold-light transition-all flex items-center justify-center gap-2"
+                                >
+                                    <span>Request a Custom PropSouq AI Portal for Your Project â†’</span>
+                                </button>
                             </div>
                         </div>
-
                     </div>
                 </section>
             );
         }
 
         // =========================================================================
-        // INDUSTRIES WE SERVE
+        // INDUSTRY EXPERTISE SECTION (Clear, Targeted Applications)
         // =========================================================================
         function IndustrySection({ onOpenConsultation }) {
             const industries = [
-                { 
-                    name: 'Real Estate', 
-                    highlight: true, 
-                    badge: 'FLAGSHIP VERTICAL',
-                    desc: 'Digital sales portals, 3D interactive villa models, buyer intent intelligence, and site-visit scheduling powered by our PropSouq AI platform.' 
-                },
-                { 
-                    name: 'Clinics & Healthcare', 
-                    highlight: false, 
-                    badge: 'HEALTHCARE ADMIN',
-                    desc: 'Patient intake funnels, 24/7 appointment inquiry automation, procedure FAQ assistants, and automated reminder sequences.' 
-                },
-                { 
-                    name: 'Education & Academies', 
-                    highlight: false, 
-                    badge: 'STUDENT INTAKE',
-                    desc: 'Student admission funnels, automated course eligibility qualification, brochure dispatch, and enrollment counseling workflows.' 
-                },
-                { 
-                    name: 'Local Service Businesses', 
-                    highlight: false, 
-                    badge: 'LOCAL SERVICE',
-                    desc: 'High-converting local lead generation, instant quote request capture, review collection automation, and location SEO.' 
-                },
-                { 
-                    name: 'Professional Services', 
-                    highlight: false, 
-                    badge: 'B2B CONSULTING',
-                    desc: 'Authority-building digital platforms, proposal intake workflows, appointment booking, and automated client onboarding.' 
-                },
-                { 
-                    name: 'Sales-Driven Businesses', 
-                    highlight: false, 
-                    badge: 'PIPELINE VELOCITY',
-                    desc: 'Paid customer acquisition funnels, instant lead qualification under 60 seconds, and seamless CRM synchronization.' 
-                }
-            ];
-
-            return (
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark">Industry Expertise</span>
-                        <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Industries We Serve.
-                        </h2>
-                        <p className="text-base text-muted">
-                            How our digital growth systems and automation workflows solve problems across distinct commercial sectors.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {industries.map((ind, idx) => (
-                            <div 
-                                key={idx} 
-                                className={`p-7 rounded-3xl border transition-all flex flex-col justify-between ${ind.highlight ? 'bg-forest text-white border-gold shadow-card' : 'bg-white/90 backdrop-blur-sm text-dark border-forest/10 shadow-soft hover:border-gold/40'}`}
-                            >
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-xl font-display font-bold">{ind.name}</h4>
-                                        <span className={`text-[9px] px-2 py-0.5 rounded font-mono font-bold ${ind.highlight ? 'bg-gold text-forest' : 'bg-forest/5 text-forest'}`}>
-                                            {ind.badge}
-                                        </span>
-                                    </div>
-                                    <p className={`text-xs leading-relaxed ${ind.highlight ? 'text-ivory-dark' : 'text-muted'}`}>{ind.desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            );
-        }
-
-        // =========================================================================
-        // WHY EAGLE STACK MEDIA
-        // =========================================================================
-        function WhyEagleStackSection({ onOpenConsultation }) {
-            const reasons = [
                 {
-                    title: 'Acquisition + Automation in One Team',
-                    desc: 'Most agencies only run ads, while software shops only write code. We bridge the gap: generating qualified demand and automating the operations required to convert it.'
+                    title: 'Real Estate & Builders',
+                    tag: 'FLAGSHIP SECTOR',
+                    highlight: true,
+                    desc: '3D virtual property tours, buyer intent qualification, automated site visit booking, and ad funnels via our PropSouq AI platform.',
+                    metric: '3x higher site visit conversion'
                 },
                 {
-                    title: 'Focus on Real Business Pipeline',
-                    desc: 'We do not report vanity impressions, hollow clicks, or invented statistics. We align our deliverables with qualified lead volume, operational velocity, and commercial growth.'
+                    title: 'Healthcare & Clinics',
+                    tag: 'HEALTHCARE',
+                    highlight: false,
+                    desc: '24/7 patient intake automation, automated reminder sequences to eliminate no-shows, and local Google Search patient funnels.',
+                    metric: '85% fewer phone inquiries'
                 },
                 {
-                    title: 'Proprietary Technology & Turnkey Systems',
-                    desc: 'We build and operate our own software products, including our PropSouq AI platform. Clients benefit from battle-tested codebases and production architecture.'
+                    title: 'Home & Local Services',
+                    tag: 'LOCAL SERVICES',
+                    highlight: false,
+                    desc: 'Local Google Ads, instant quote capture, automatic WhatsApp dispatch, and 5-star Google review collection on autopilot.',
+                    metric: '2.5x more quote requests'
                 },
                 {
-                    title: 'Transparent Engagement & Rapid Deployment',
-                    desc: 'No black-box retainers or endless delay cycles. We define clear scopes, transparent deliverables, and deploy systems into production within weeks.'
+                    title: 'Professional & Legal Firms',
+                    tag: 'B2B CONSULTING',
+                    highlight: false,
+                    desc: 'Credibility-building 3D websites, client intake forms, automated consultation scheduling, and targeted LinkedIn/Google ads.',
+                    metric: '48% lower cost per client meeting'
+                },
+                {
+                    title: 'Coaching & Academies',
+                    tag: 'EDUCATION',
+                    highlight: false,
+                    desc: 'Student admission funnels, automated course eligibility screening, instant brochure dispatch, and WhatsApp enrollment counseling.',
+                    metric: '40% higher enrollment conversion'
+                },
+                {
+                    title: 'E-Commerce & Brands',
+                    tag: 'RETAIL',
+                    highlight: false,
+                    desc: 'Meta and Instagram performance ads, abandoned cart recovery workflows, high-speed conversion design, and customer retention.',
+                    metric: '3.8x sustained average ROAS'
                 }
             ];
 
             return (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
                     <div className="max-w-3xl space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark">The Advantage</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">INDUSTRY EXPERTISE</span>
                         <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Why Eagle Stack Media.
+                            Tailored for Your Industry.
                         </h2>
-                        <p className="text-base text-muted">
-                            Built for businesses ready to acquire customers and operate with modern technology.
+                        <p className="text-base sm:text-lg text-muted">
+                            Every sector has unique customer behavior. Here is how our growth and automation systems deliver results in your market.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {reasons.map((r, i) => (
-                            <div key={i} className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 border border-forest/10 shadow-soft space-y-3 hover:border-gold/50 transition-colors">
-                                <div className="w-8 h-8 rounded-lg bg-forest/5 text-forest flex items-center justify-center font-bold text-sm">
-                                    0{i + 1}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {industries.map((ind, i) => (
+                            <div
+                                key={i}
+                                className={`p-7 rounded-3xl border transition-all flex flex-col justify-between space-y-4 ${ind.highlight ? 'bg-forest text-white border-gold shadow-card' : 'bg-white/95 text-dark border-forest/10 shadow-soft hover:border-gold/40'}`}
+                            >
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-xl font-display font-bold">{ind.title}</h4>
+                                        <span className={`text-[9px] px-2.5 py-0.5 rounded font-mono font-bold uppercase ${ind.highlight ? 'bg-gold text-forest' : 'bg-forest/5 text-forest'}`}>
+                                            {ind.tag}
+                                        </span>
+                                    </div>
+                                    <p className={`text-xs sm:text-sm leading-relaxed ${ind.highlight ? 'text-ivory-dark' : 'text-muted'}`}>
+                                        {ind.desc}
+                                    </p>
                                 </div>
-                                <h3 className="text-xl font-display font-bold text-forest">{r.title}</h3>
-                                <p className="text-xs text-muted leading-relaxed">{r.desc}</p>
+                                <div className={`pt-3 border-t text-xs font-bold flex items-center justify-between ${ind.highlight ? 'border-white/10 text-gold' : 'border-forest/10 text-emerald-700'}`}>
+                                    <span>Outcome: {ind.metric}</span>
+                                    <button
+                                        onClick={() => onOpenConsultation(`Industry Strategy: ${ind.title}`)}
+                                        className="hover:underline text-[11px]"
+                                    >
+                                        Discuss â†’
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -2150,69 +2252,145 @@
         }
 
         // =========================================================================
-        // IMPLEMENTATION PROCESS (Required on Homepage)
+        // INTERACTIVE GROWTH & ROI PLANNER (Engaging, Visual, Fun)
         // =========================================================================
-        function ImplementationProcessSection() {
-            const phases = [
+        function InteractiveGrowthPlanner({ onOpenConsultation }) {
+            const [selectedIndustry, setSelectedIndustry] = useState('Real Estate');
+            const [targetLeads, setTargetLeads] = useState(50);
+
+            const calculateMetrics = () => {
+                let leadVal = 15000;
+                if (selectedIndustry === 'Real Estate') leadVal = 45000;
+                if (selectedIndustry === 'Healthcare') leadVal = 8000;
+                if (selectedIndustry === 'Services') leadVal = 12000;
+
+                const estRevenue = (targetLeads * leadVal * 0.15).toLocaleString('en-IN');
+                const hoursSaved = Math.round(targetLeads * 1.5);
+                return { estRevenue, hoursSaved };
+            };
+
+            const { estRevenue, hoursSaved } = calculateMetrics();
+
+            return (
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-white/95 rounded-3xl p-8 sm:p-12 border border-forest/15 shadow-card space-y-8">
+                        <div className="max-w-2xl space-y-2">
+                            <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">GROWTH CALCULATOR</span>
+                            <h2 className="text-2xl sm:text-4xl font-display font-extrabold text-forest">
+                                Plan Your Growth Targets.
+                            </h2>
+                            <p className="text-sm text-muted">
+                                Select your industry and desired monthly client inquiries to estimate your pipeline impact and operational hours saved.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                            <div className="lg:col-span-7 space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-forest uppercase font-mono">1. Select Your Industry</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {['Real Estate', 'Healthcare', 'Services'].map((ind) => (
+                                            <button
+                                                key={ind}
+                                                onClick={() => setSelectedIndustry(ind)}
+                                                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all border ${selectedIndustry === ind ? 'bg-forest text-white border-forest shadow-soft' : 'bg-white text-muted border-forest/10 hover:border-gold'}`}
+                                            >
+                                                {ind}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-xs font-bold text-forest">
+                                        <span>2. Monthly Qualified Inquiries Target</span>
+                                        <span className="font-mono text-gold-dark text-base">{targetLeads} Leads / mo</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="15"
+                                        max="150"
+                                        step="5"
+                                        value={targetLeads}
+                                        onChange={(e) => setTargetLeads(Number(e.target.value))}
+                                        className="w-full accent-forest cursor-pointer"
+                                    />
+                                    <div className="flex justify-between text-[10px] text-muted font-mono">
+                                        <span>15 Leads</span>
+                                        <span>75 Leads</span>
+                                        <span>150+ Leads</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-5 bg-forest rounded-2xl p-6 text-white space-y-4 shadow-luxury">
+                                <div className="text-xs font-mono font-bold text-gold uppercase tracking-wider">Estimated Monthly Value</div>
+                                <div className="space-y-1">
+                                    <div className="text-3xl sm:text-4xl font-display font-extrabold text-white">
+                                        â‚¹{estRevenue}
+                                    </div>
+                                    <div className="text-xs text-ivory-dark">Projected New Pipeline Value</div>
+                                </div>
+                                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                                    <span className="text-ivory-dark">Time Saved by AI Agents:</span>
+                                    <span className="font-bold text-emerald-400 font-mono">~{hoursSaved} Hours / mo</span>
+                                </div>
+                                <button
+                                    onClick={() => onOpenConsultation(`Target: ${targetLeads} Leads/mo in ${selectedIndustry}`)}
+                                    className="w-full py-3.5 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-xs shadow-soft transition-all"
+                                >
+                                    Claim This Growth Blueprint â†’
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // =========================================================================
+        // WHY EAGLE STACK MEDIA (Honest, Reliable, Commercial-First)
+        // =========================================================================
+        function WhyEagleStackSection({ onOpenConsultation }) {
+            const reasons = [
                 {
-                    phase: 'PHASE 1',
-                    timeline: 'Days 1 – 5',
-                    title: 'Audit & Technical Diagnosis',
-                    deliverable: 'Growth Blueprint',
-                    points: ['Channel audit and competitor evaluation', 'Tracking hygiene and conversion funnel mapping', 'Process bottleneck and automation scoping']
+                    title: 'Growth Marketing + AI Under One Roof',
+                    desc: 'Most agencies only run ads, while software developers only write code. We bridge the gap: generating qualified customer demand and automating the operations required to close them.'
                 },
                 {
-                    phase: 'PHASE 2',
-                    timeline: 'Days 6 – 15',
-                    title: 'Build & Architecture',
-                    deliverable: 'Staging Environment',
-                    points: ['Campaign structure and creative development', 'AI agent configuration and workflow logic', 'Website UI/UX development and tracking instrumentation']
+                    title: 'Real Revenue Pipeline, Not Vanity Likes',
+                    desc: 'We never report hollow impressions or irrelevant clicks. Every campaign and workflow is tied to real customer inquiries, booked appointments, and commercial ROI.'
                 },
                 {
-                    phase: 'PHASE 3',
-                    timeline: 'Days 16 – 20',
-                    title: 'Testing & Launch',
-                    deliverable: 'Production Deployment',
-                    points: ['End-to-end form and lead dispatch testing', 'Pixel, CAPI, and GA4 telemetry verification', 'Live launch of campaigns, workflows, or web portal']
+                    title: 'Our Own Battle-Tested Software',
+                    desc: 'We build and operate our own commercial platforms like PropSouq AI. Our clients benefit from production-grade code, reliable infrastructure, and cutting-edge 3D technology.'
                 },
                 {
-                    phase: 'PHASE 4',
-                    timeline: 'Ongoing',
-                    title: 'Optimization & Iteration',
-                    deliverable: 'Weekly Performance Reports',
-                    points: ['Continuous creative testing and budget optimization', 'AI response monitoring and prompt refinement', 'Web conversion rate optimization (CRO) cycles']
+                    title: 'Fast Deployment in Days, Not Months',
+                    desc: 'No endless delay cycles or complicated retainers. We define a clear scope, build your ads, AI agent, or 3D website, and launch within 7 to 14 days.'
                 }
             ];
 
             return (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="max-w-3xl space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark">Predictable Delivery</span>
+                    <div className="max-w-3xl space-y-3">
+                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">THE ADVANTAGE</span>
                         <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
-                            Our Implementation Process.
+                            Why Growing Businesses Choose Us.
                         </h2>
                         <p className="text-base text-muted">
-                            Clear milestones and structured timelines so you always know what is being built and delivered.
+                            A dedicated technical growth partner designed to scale your operations without overhead.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {phases.map((p, idx) => (
-                            <div key={idx} className="bg-white/90 backdrop-blur-sm p-7 rounded-3xl border border-forest/10 shadow-soft space-y-4 hover:border-forest/40 transition-all">
-                                <div className="flex items-center justify-between text-xs">
-                                    <span className="font-mono font-bold text-gold-dark">{p.phase}</span>
-                                    <span className="text-[10px] font-mono text-muted px-2 py-0.5 rounded bg-forest/5">{p.timeline}</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {reasons.map((r, i) => (
+                            <div key={i} className="card-3d bg-white/95 rounded-3xl p-8 border border-forest/10 shadow-soft space-y-3 hover:border-gold/50 transition-colors">
+                                <div className="w-8 h-8 rounded-lg bg-forest/5 text-forest flex items-center justify-center font-bold text-sm">
+                                    0{i + 1}
                                 </div>
-                                <h3 className="text-lg font-display font-bold text-forest">{p.title}</h3>
-                                <div className="text-[11px] font-semibold text-emerald-800">Deliverable: {p.deliverable}</div>
-                                <ul className="space-y-2 text-xs text-muted border-t border-forest/10 pt-3">
-                                    {p.points.map((pt, i) => (
-                                        <li key={i} className="flex items-start gap-2">
-                                            <span className="text-gold font-bold">•</span>
-                                            <span>{pt}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <h3 className="text-xl font-display font-bold text-forest">{r.title}</h3>
+                                <p className="text-xs sm:text-sm text-muted leading-relaxed">{r.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -2221,47 +2399,43 @@
         }
 
         // =========================================================================
-        // FAQS SECTION (Interactive Accordion on Homepage)
+        // FAQS SECTION (Simple, Direct, Everyday Language)
         // =========================================================================
         function FaqSection() {
             const [openIndex, setOpenIndex] = useState(0);
 
             const faqs = [
                 {
-                    q: 'What core services does Eagle Stack Media provide?',
-                    a: 'Eagle Stack Media provides three integrated capabilities: Digital Growth & Performance Marketing (Google Ads, Meta Ads, SEO, content), Practical AI Automation (AI agents, lead qualification workflows, WhatsApp automation), and Modern Web Development / Web-as-a-Service (WaaS).'
+                    q: 'How quickly can we launch a campaign or website?',
+                    a: 'Most projects are ready to launch in 7 to 14 business days. Ad funnels and AI assistants can often go live in under a week once we receive your business details.'
                 },
                 {
-                    q: 'What is PropSouq AI, and how is it related to Eagle Stack Media?',
-                    a: 'PropSouq AI is our flagship real estate technology product developed and operated by Eagle Stack Media. It provides real estate agents, brokers, builders, and developers with dedicated branded digital property platforms featuring interactive 3D models, EMI calculators, and buyer intelligence tools.'
+                    q: 'Do I need any technical knowledge to work with you?',
+                    a: 'Zero. We handle all the technical setup, hosting, AI configuration, and ad management for you. You only focus on handling the qualified customer inquiries and closing sales.'
                 },
                 {
-                    q: 'Do you promise guaranteed rankings, leads, or revenue?',
-                    a: 'No. We operate with strict commercial integrity. We do not make false guarantees regarding rankings, revenue, or conversion rates, as those depend on market demand, competitive bids, and product-market fit. Instead, we guarantee rigorous technical execution, clean tracking, and disciplined optimization.'
+                    q: 'How does the 24/7 AI Smart Assistant work?',
+                    a: 'We connect an intelligent AI agent to your website and WhatsApp Business. When a customer reaches out, the AI replies instantly, answers their questions based on your verified business information, qualifies their budget, and schedules an appointment on your calendar.'
                 },
                 {
-                    q: 'What is Web-as-a-Service (WaaS)?',
-                    a: 'Web-as-a-Service is a modern alternative to traditional agency website redesigns. Instead of paying large upfront fees for a static site that becomes outdated, WaaS includes design, modern development, high-speed hosting, security, and continuous monthly conversion optimizations under a predictable model.'
+                    q: 'What is PropSouq AI and is it only for real estate?',
+                    a: 'PropSouq AI is our flagship software developed specifically for real estate builders, brokers, and developers. It provides 3D virtual villa tours, interactive floor plans, and financial simulators to help close property sales faster.'
                 },
                 {
-                    q: 'What does the consultation process look like?',
-                    a: 'Our consultation is a direct, 30-minute discovery session with our digital strategists. We evaluate your current customer acquisition channels, identify operational bottlenecks suitable for AI automation, and discuss technical platform options without sales pressure.'
-                },
-                {
-                    q: 'What integrations are supported for AI automation?',
-                    a: 'We build automations connecting web frontends, WhatsApp Business Cloud API, CRM systems (HubSpot, Zoho, Salesforce), calendar booking tools (Calendly, Google Calendar), and internal knowledge bases using secure webhooks, Make/Zapier, or custom API microservices.'
+                    q: 'How do we get started?',
+                    a: 'Simply click "Book a Free Consultation" or reach out via WhatsApp. We will hold a 15-minute discovery call to review your current business bottlenecks and outline a clear growth plan.'
                 }
             ];
 
             return (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
                     <div className="max-w-3xl space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark">Common Questions</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-gold-dark font-mono">COMMON QUESTIONS</span>
                         <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-forest tracking-tight">
                             Frequently Asked Questions.
                         </h2>
                         <p className="text-base text-muted">
-                            Transparent answers about our agency capabilities, product model, and commercial approach.
+                            Transparent answers about how we partner with businesses.
                         </p>
                     </div>
 
@@ -2291,37 +2465,66 @@
         }
 
         // =========================================================================
-        // FINAL CTA SECTION (Required on Homepage)
+        // FINAL CALL TO ACTION SECTION
         // =========================================================================
         function FinalCtaSection({ onNavigate, onOpenConsultation }) {
             return (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="bg-forest rounded-3xl p-10 sm:p-16 border border-gold/40 shadow-luxury text-center space-y-6 relative overflow-hidden">
                         <div className="max-w-3xl mx-auto space-y-4 relative z-10 text-ivory">
-                            <span className="text-[11px] font-mono uppercase text-gold font-bold tracking-widest">START BUILDING TODAY</span>
-                            <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight">
-                                Grow Your Business. Automate What Slows You Down.
+                            <span className="text-[11px] font-mono uppercase text-gold font-bold tracking-widest">READY TO GROW?</span>
+                            <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight leading-tight">
+                                Let's Build Your Digital Growth Engine.
                             </h2>
                             <p className="text-base sm:text-lg text-ivory-dark leading-relaxed font-normal">
-                                Whether you need qualified customer acquisition, autonomous AI workflows, or our flagship PropSouq AI real estate platform, let's build the system together.
+                                Whether you need more high-ticket leads, automated 24/7 customer follow-ups, or our 3D PropSouq AI platform, we are ready to help your business scale.
                             </p>
                             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                                 <button
                                     onClick={() => onOpenConsultation('Final CTA Consultation')}
                                     className="px-8 py-4 rounded-xl bg-gold hover:bg-gold-light text-forest font-bold text-sm shadow-soft transition-all btn-luxury-shimmer"
                                 >
-                                    Book a Consultation
+                                    Book a Free Consultation
                                 </button>
-                                <button
-                                    onClick={() => onNavigate('propsouq-ai')}
-                                    className="px-7 py-4 rounded-xl bg-forest-card border border-white/10 hover:border-gold text-white font-semibold text-sm transition-all"
+                                <a
+                                    href="propsouq.html"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-7 py-4 rounded-xl bg-forest-card border border-white/10 hover:border-gold text-white font-semibold text-sm transition-all flex items-center gap-2"
                                 >
-                                    Explore PropSouq AI
-                                </button>
+                                    <Icon name="external-link" className="w-4 h-4 text-gold" />
+                                    <span>Explore 3D PropSouq Demo</span>
+                                </a>
                             </div>
                         </div>
                     </div>
                 </section>
+            );
+        }
+
+        // =========================================================================
+        // MOBILE STICKY QUICK ACTION BAR (Frictionless Mobile Conversion)
+        // =========================================================================
+        function MobileQuickBar({ onOpenConsultation }) {
+            return (
+                <div className="sm:hidden fixed bottom-3 left-3 right-3 z-40 bg-forest/95 backdrop-blur-lg border border-gold/40 rounded-2xl p-2.5 shadow-luxury flex items-center justify-between gap-2">
+                    <button
+                        onClick={() => onOpenConsultation('Mobile Quick Consultation')}
+                        className="flex-1 py-3 px-3 rounded-xl bg-gold text-forest font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-soft btn-luxury-shimmer"
+                    >
+                        <Icon name="calendar" className="w-4 h-4 text-forest" />
+                        <span>Book Free Call</span>
+                    </button>
+                    <a
+                        href="propsouq.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 py-3 px-3 rounded-xl bg-forest-card border border-gold/30 text-gold font-bold text-xs flex items-center justify-center gap-1.5"
+                    >
+                        <Icon name="sparkles" className="w-4 h-4 text-emerald-400" />
+                        <span>3D Demo</span>
+                    </a>
+                </div>
             );
         }
 
